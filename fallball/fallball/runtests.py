@@ -6,7 +6,6 @@ import django
 from django.conf import settings
 from django.test.utils import get_runner
 
-
 os.environ['DJANGO_SETTINGS_MODULE'] = 'fallball.settings'
 django.setup()
 
