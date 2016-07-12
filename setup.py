@@ -5,6 +5,7 @@ from setuptools import find_packages, setup
 
 PACKAGE_VERSION = '0.1'
 
+
 def version():
     path_version = join(dirname(abspath(__file__)), 'version.txt')
 
