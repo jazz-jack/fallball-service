@@ -1,4 +1,6 @@
 # FallBall
+[![Build Status](https://travis-ci.org/odin-public/fallball-service.svg?branch=master)](https://travis-ci.org/odin-public/fallball-service)
+[![Coverage Status](https://coveralls.io/repos/github/odin-public/fallball-service/badge.svg?branch=master)](https://coveralls.io/github/odin-public/fallball-service?branch=master)
 
 ## Overview
 FallBall is the best in class file sharing service that offers cloud storage and file synchronization for small and medium businesses (SMBs) worldwide.

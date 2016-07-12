@@ -10,7 +10,9 @@ install:
   - pip install -r test-requirements.txt
 script:
   - python setup.py flake8
-  - python setup.py test
+  - coverage run --source=fallball setup.py test
+after_success:
+  coveralls
 deploy:
   provider: pypi
   user: apslite
