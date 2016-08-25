@@ -12,7 +12,8 @@ script:
   - python setup.py flake8
   - coverage run --source=fallball setup.py test
 after_success:
-  coveralls
+  - coveralls
+  - bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: pypi
   user: apslite
