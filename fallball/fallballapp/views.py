@@ -199,6 +199,7 @@ class ClientUserViewSet(ModelViewSet):
             free_space = client.limit - client.get_usage()
             if free_space >= request.data['storage']['limit']:
                 request.data['client'] = client.id
+                request.data['admin'] = True if request.data['role'] == 'admin' else False
                 return ModelViewSet.create(self, request, *args, **kwargs)
             return Response('Client limit is reached', status=status.HTTP_400_BAD_REQUEST)
         return Response('Current reseller does not have permissions for this client', status=status.HTTP_403_FORBIDDEN)
