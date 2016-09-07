@@ -101,7 +101,7 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
         # Usage is random but not more than limit
         usage = randint(0, validated_data['limit'])
 
-        user = User.objects.create_user(username=validated_data['id'], admin=admin, password=validated_data['password'])
+        user = User.objects.create_user(username=validated_data['id'], password=validated_data['password'])
         return ClientUser.objects.create(usage=usage, user=user, **validated_data)
 
     def get_role(self, obj):
