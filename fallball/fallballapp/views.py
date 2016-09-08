@@ -205,8 +205,8 @@ class ClientUserViewSet(ModelViewSet):
                 request.data['client'] = client.id
                 request.data['admin'] = request.data['role'] == 'admin'
                 return ModelViewSet.create(self, request, *args, **kwargs)
-            return Response('Client limit is reached', status=status.HTTP_400_BAD_REQUEST)
-        return Response('Current reseller does not have permissions for this client',
+            return Response("Client limit is reached", status=status.HTTP_400_BAD_REQUEST)
+        return Response("Current reseller does not have permissions for this client",
                         status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
@@ -217,7 +217,7 @@ class ClientUserViewSet(ModelViewSet):
 
         ClientUser.objects.filter(id=kwargs['pk']).delete()
         User.objects.filter(username=kwargs['pk']).delete()
-        return Response('User has been deleted', status=status.HTTP_204_NO_CONTENT)
+        return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request, **kwargs):
         if request.user.is_superuser:
