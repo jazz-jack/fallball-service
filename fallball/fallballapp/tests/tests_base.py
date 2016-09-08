@@ -44,7 +44,7 @@ class BaseTestCase(TestCase):
 
         # create client user
         self.client_request.post('/v1/resellers/test_reseller/clients/test_client/users/',
-                                 '{"id":"test_user@test.tld", "storage":{"limit": 50}, "password": "1q2w3e"}',
+                                 '{"id":"test_user@test.tld", "role":"admin", "storage":{"limit": 50}, "password": "1q2w3e"}',
                                  content_type='application/json')
 
         # Check that all objects have been created correctly
