@@ -47,7 +47,7 @@ class ResellerViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return ModelViewSet.retrieve(self, request, *args, **kwargs)
-        return Response("Only superuser can get reseller information", 
+        return Response("Only superuser can get reseller information",
                         status=status.HTTP_403_FORBIDDEN)
 
     @detail_route(methods=['get'])
@@ -64,7 +64,7 @@ class ResellerViewSet(ModelViewSet):
         if dump_exits(reseller.pk):
             repair(Reseller, reseller.pk)
             return Response("All clients has been repaired", status=status.HTTP_200_OK)
-        return Response("This reseller cannot be repaired", 
+        return Response("This reseller cannot be repaired",
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @list_route(methods=['get'])
@@ -153,7 +153,7 @@ class ClientViewSet(ModelViewSet):
         try:
             repair(Client, kwargs['pk'])
         except:
-            return Response("This client cannot be repaired", 
+            return Response("This client cannot be repaired",
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response("Client has been repaired", status=status.HTTP_200_OK)
 
@@ -169,7 +169,7 @@ class ClientViewSet(ModelViewSet):
 
         clients = get_all_reseller_clients(kwargs['reseller_pk'])
         if not clients:
-            return Response("There are no clients to repair", 
+            return Response("There are no clients to repair",
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Delete all reseller clients
@@ -206,7 +206,8 @@ class ClientUserViewSet(ModelViewSet):
                 request.data['admin'] = request.data['role'] == 'admin'
                 return ModelViewSet.create(self, request, *args, **kwargs)
             return Response('Client limit is reached', status=status.HTTP_400_BAD_REQUEST)
-        return Response('Current reseller does not have permissions for this client', status=status.HTTP_403_FORBIDDEN)
+        return Response('Current reseller does not have permissions for this client',
+                        status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
         if request.user.is_superuser:

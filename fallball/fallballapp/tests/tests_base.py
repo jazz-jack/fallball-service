@@ -57,7 +57,7 @@ class BaseTestCase(TestCase):
         self.client_request.post('/v1/resellers/',
                                  '{"id":"RecreationReseller", "storage":{"limit": 200}}',
                                  content_type='application/json')
-        self.client_request.delete('/v1/resellers/RecreationReseller', 
+        self.client_request.delete('/v1/resellers/RecreationReseller',
                                    content_type='application/json')
         self.client_request.post('/v1/resellers/',
                                  '{"id":"RecreationReseller", "storage":{"limit": 200}}',
