@@ -41,7 +41,7 @@ def _get_dump():
 
 
 def is_model(obj, model):
-    if obj['model'] == 'fallballapp.' + model:
+    if obj['model'] == 'fallballapp.{model}'.format(model=model):
         return True
     return False
 
