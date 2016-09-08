@@ -57,13 +57,13 @@ class BaseTestCase(TestCase):
 
     def test_object_recreation(self):
         self.client_request.post('/v1/resellers/',
-                                 json.dumps({'id': 'RecreationReseller', 
+                                 json.dumps({'id': 'RecreationReseller',
                                              'storage': {'limit': 200}}),
                                  content_type='application/json')
         self.client_request.delete('/v1/resellers/RecreationReseller',
                                    content_type='application/json')
         self.client_request.post('/v1/resellers/',
-                                 json.dumps({'id': 'RecreationReseller', 
+                                 json.dumps({'id': 'RecreationReseller',
                                              'storage': {'limit': 200}}),
                                  content_type='application/json')
 
@@ -87,7 +87,7 @@ class ResetTestCase(TestCase):
 
         # Create new reseller to be aware it is delete after the /rest calling
         self.client_request.post('/v1/resellers/',
-                                 json.dumps({'id': 'test_reset_reseller', 
+                                 json.dumps({'id': 'test_reset_reseller',
                                              'storage': {'limit': 300}}),
                                  content_type='application/json')
 
@@ -123,7 +123,7 @@ class ResetTestCase(TestCase):
 
         self.client_request.post('/v1/resellers/reseller_a/clients/SunnyFlowers/users/',
                                  json.dumps({'id': 'test_user@sunnyflowers.tld', 'role': 'admin',
-                                 'storage': {'limit': 50}, 'password': '1q2w3e'}),
+                                             'storage': {'limit': 50}, 'password': '1q2w3e'}),
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reseller_a/clients/SunnyFlowers/reset/')
