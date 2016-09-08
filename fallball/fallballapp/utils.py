@@ -39,10 +39,12 @@ def _get_dump():
 
     return data
 
+
 def is_model(obj, model):
-    if obj['model'] == 'fallballapp' + model:
+    if obj['model'] == 'fallballapp.' + model:
         return True
     return False
+
 
 def get_object_or_403(*args, **kwargs):
     try:
