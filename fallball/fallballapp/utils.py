@@ -40,6 +40,12 @@ def _get_dump():
     return data
 
 
+def is_model(obj, model):
+    if obj['model'] == 'fallballapp.{model}'.format(model=model):
+        return True
+    return False
+
+
 def get_object_or_403(*args, **kwargs):
     try:
         result = get_object_or_404(*args, **kwargs)
@@ -69,7 +75,7 @@ def repair(model, pk):
             # Delete all clients that exist for this reseller
             Client.objects.filter(reseller_id=initial_obj['pk']).delete()
 
-            initial_clients = ([item for item in data if item['model'] == 'fallballapp.client' and
+            initial_clients = ([item for item in data if is_model(item, 'client') and
                                 item['fields']['reseller_id'] == pk])
             for initial_client in initial_clients:
                 repair(Client, initial_client['pk'])
@@ -82,7 +88,7 @@ def repair(model, pk):
             # Delete all users that exist for this client
             ClientUser.objects.filter(client_id=initial_obj['pk']).delete()
 
-            initial_client_users = ([item for item in data if item['model'] == 'fallballapp.clientuser' and
+            initial_client_users = ([item for item in data if is_model(item, 'clientuser') and
                                      item['fields']['client_id'] == initial_obj['pk']])
             for initial_client_user in initial_client_users:
                 repair(ClientUser, initial_client_user['pk'])
@@ -102,7 +108,7 @@ def get_all_resellers():
     Get all resellers from fixture file
     """
     data = _get_dump()
-    resellers = [item for item in data if item['model'] == 'fallballapp.reseller']
+    resellers = [item for item in data if is_model(item, 'reseller')]
     return resellers
 
 
@@ -111,7 +117,7 @@ def get_all_reseller_clients(reseller_pk):
     Get all resellers from fixture file
     """
     data = _get_dump()
-    clients = [item for item in data if item['model'] == 'fallballapp.client' and
+    clients = [item for item in data if is_model(item, 'client') and
                item['fields']['reseller_id'] == reseller_pk]
     return clients
 

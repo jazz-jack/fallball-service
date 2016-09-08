@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
@@ -35,16 +37,17 @@ class BaseTestCase(TestCase):
     def test_object_creation(self):
         # create reseller
         self.client_request.post('/v1/resellers/',
-                                 '{"id":"test_reseller", "storage":{"limit": 200}}',
+                                 json.dumps({'id': 'test_reseller', 'storage': {'limit': 200}}),
                                  content_type='application/json')
         # create client
         self.client_request.post('/v1/resellers/test_reseller/clients/',
-                                 '{"id":"test_client", "storage":{"limit": 100}}',
+                                 json.dumps({'id': 'test_client', 'storage': {'limit': 100}}),
                                  content_type='application/json')
 
         # create client user
         self.client_request.post('/v1/resellers/test_reseller/clients/test_client/users/',
-                                 '{"id":"test_user@test.tld", "role":"admin", "storage":{"limit": 50}, "password": "1q2w3e"}',
+                                 json.dumps({'id': 'test_user@test.tld', 'role': 'admin',
+                                             'storage': {'limit': 50}, 'password': '1q2w3e'}),
                                  content_type='application/json')
 
         # Check that all objects have been created correctly
@@ -54,11 +57,14 @@ class BaseTestCase(TestCase):
 
     def test_object_recreation(self):
         self.client_request.post('/v1/resellers/',
-                                 '{"id":"RecreationReseller", "storage":{"limit": 200}}',
+                                 json.dumps({'id': 'RecreationReseller',
+                                             'storage': {'limit': 200}}),
                                  content_type='application/json')
-        self.client_request.delete('/v1/resellers/RecreationReseller', content_type='application/json')
+        self.client_request.delete('/v1/resellers/RecreationReseller',
+                                   content_type='application/json')
         self.client_request.post('/v1/resellers/',
-                                 '{"id":"RecreationReseller", "storage":{"limit": 200}}',
+                                 json.dumps({'id': 'RecreationReseller',
+                                             'storage': {'limit': 200}}),
                                  content_type='application/json')
 
 
@@ -81,7 +87,8 @@ class ResetTestCase(TestCase):
 
         # Create new reseller to be aware it is delete after the /rest calling
         self.client_request.post('/v1/resellers/',
-                                 '{"id":"test_reset_reseller", "storage":{"limit": 300}}',
+                                 json.dumps({'id': 'test_reset_reseller',
+                                             'storage': {'limit': 300}}),
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reset_all/')
@@ -101,7 +108,7 @@ class ResetTestCase(TestCase):
     def test_reset_all_clients(self):
         Client.objects.filter(id='SunnyFlowers').delete()
         self.client_request.post('/v1/resellers/reseller_a/clients/',
-                                 '{"id":"test_client", "storage":{"limit": 100}}',
+                                 json.dumps({'id': 'test_client', 'storage': {'limit': 100}}),
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reseller_a/clients/reset_all/')
@@ -113,8 +120,10 @@ class ResetTestCase(TestCase):
 
     def test_reset_client(self):
         ClientUser.objects.filter(id='brown@sunnyflowers.tld').delete()
+
         self.client_request.post('/v1/resellers/reseller_a/clients/SunnyFlowers/users/',
-                                 '{"id":"test_user@sunnyflowers.tld", "role":"admin", "storage":{"limit": 50}, "password": "1q2w3e"}',
+                                 json.dumps({'id': 'test_user@sunnyflowers.tld', 'role': 'admin',
+                                             'storage': {'limit': 50}, 'password': '1q2w3e'}),
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reseller_a/clients/SunnyFlowers/reset/')
