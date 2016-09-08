@@ -57,12 +57,14 @@ class BaseTestCase(TestCase):
 
     def test_object_recreation(self):
         self.client_request.post('/v1/resellers/',
-                                 json.dumps({'id': 'RecreationReseller', 'storage': {'limit': 200}}),
+                                 json.dumps({'id': 'RecreationReseller', 
+                                             'storage': {'limit': 200}}),
                                  content_type='application/json')
         self.client_request.delete('/v1/resellers/RecreationReseller',
                                    content_type='application/json')
         self.client_request.post('/v1/resellers/',
-                                 json.dumps({'id': 'RecreationReseller', 'storage': {'limit': 200}}),
+                                 json.dumps({'id': 'RecreationReseller', 
+                                             'storage': {'limit': 200}}),
                                  content_type='application/json')
 
 
@@ -85,7 +87,8 @@ class ResetTestCase(TestCase):
 
         # Create new reseller to be aware it is delete after the /rest calling
         self.client_request.post('/v1/resellers/',
-                                 json.dumps({'id': 'test_reset_reseller', 'storage': {'limit': 300}}),
+                                 json.dumps({'id': 'test_reset_reseller', 
+                                             'storage': {'limit': 300}}),
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reset_all/')
