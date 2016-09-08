@@ -118,7 +118,7 @@ class ResetTestCase(TestCase):
 
         self.client_request.post('/v1/resellers/reseller_a/clients/SunnyFlowers/users/',
                                  '{"id":"test_user@sunnyflowers.tld", "role":"admin",' \
-                                 '"storage":{"limit": 50}, "password": "1q2w3e"}'
+                                 '"storage":{"limit": 50}, "password": "1q2w3e"}',
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reseller_a/clients/SunnyFlowers/reset/')
