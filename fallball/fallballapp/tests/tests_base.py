@@ -44,7 +44,8 @@ class BaseTestCase(TestCase):
 
         # create client user
         self.client_request.post('/v1/resellers/test_reseller/clients/test_client/users/',
-                                 '{"id":"test_user@test.tld", "role":"admin", "storage":{"limit": 50}, "password": "1q2w3e"}',
+                                 '{"id":"test_user@test.tld", "role":"admin",' \
+                                 ' "storage":{"limit": 50}, "password": "1q2w3e"}',
                                  content_type='application/json')
 
         # Check that all objects have been created correctly
@@ -56,7 +57,8 @@ class BaseTestCase(TestCase):
         self.client_request.post('/v1/resellers/',
                                  '{"id":"RecreationReseller", "storage":{"limit": 200}}',
                                  content_type='application/json')
-        self.client_request.delete('/v1/resellers/RecreationReseller', content_type='application/json')
+        self.client_request.delete('/v1/resellers/RecreationReseller', 
+                                   content_type='application/json')
         self.client_request.post('/v1/resellers/',
                                  '{"id":"RecreationReseller", "storage":{"limit": 200}}',
                                  content_type='application/json')
@@ -113,8 +115,10 @@ class ResetTestCase(TestCase):
 
     def test_reset_client(self):
         ClientUser.objects.filter(id='brown@sunnyflowers.tld').delete()
+
         self.client_request.post('/v1/resellers/reseller_a/clients/SunnyFlowers/users/',
-                                 '{"id":"test_user@sunnyflowers.tld", "role":"admin", "storage":{"limit": 50}, "password": "1q2w3e"}',
+                                 '{"id":"test_user@sunnyflowers.tld", "role":"admin",' \
+                                 '"storage":{"limit": 50}, "password": "1q2w3e"}'
                                  content_type='application/json')
 
         self.client_request.get('/v1/resellers/reseller_a/clients/SunnyFlowers/reset/')
