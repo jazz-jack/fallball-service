@@ -105,3 +105,6 @@ fallball/db.sqlite3
 
 # travis
 version.txt
+
+#local settings
+fallball/fallball/settings.py
