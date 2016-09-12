@@ -67,7 +67,6 @@ class BaseTestCase(TestCase):
         self.assertTrue(Client.objects.filter(id='test_client'))
         self.assertTrue(ClientUser.objects.filter(id='test_admin_user@test.tld', admin=True))
         self.assertTrue(ClientUser.objects.filter(id='test_user@test.tld', admin=False))
-
         self.assertTrue(ClientUser.objects.filter(id='test_user2@test.tld', admin=False))
 
     def test_object_recreation(self):
