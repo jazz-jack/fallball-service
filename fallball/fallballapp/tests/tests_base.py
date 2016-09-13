@@ -44,16 +44,30 @@ class BaseTestCase(TestCase):
                                  json.dumps({'id': 'test_client', 'storage': {'limit': 100}}),
                                  content_type='application/json')
 
+        # create client admin user
+        self.client_request.post('/v1/resellers/test_reseller/clients/test_client/users/',
+                                 json.dumps({'id': 'test_admin_user@test.tld', 'admin': True,
+                                             'storage': {'limit': 50}, 'password': '1q2w3e'}),
+                                 content_type='application/json')
+
         # create client user
         self.client_request.post('/v1/resellers/test_reseller/clients/test_client/users/',
-                                 json.dumps({'id': 'test_user@test.tld', 'role': 'admin',
+                                 json.dumps({'id': 'test_user@test.tld', 'admin': False,
                                              'storage': {'limit': 50}, 'password': '1q2w3e'}),
+                                 content_type='application/json')
+
+        # create client user without admin field
+        self.client_request.post('/v1/resellers/test_reseller/clients/test_client/users/',
+                                 json.dumps({'id': 'test_user2@test.tld',
+                                             'storage': {'limit': 3}, 'password': '1q2w3e'}),
                                  content_type='application/json')
 
         # Check that all objects have been created correctly
         self.assertTrue(Reseller.objects.filter(id='test_reseller'))
         self.assertTrue(Client.objects.filter(id='test_client'))
-        self.assertTrue(ClientUser.objects.filter(id='test_user@test.tld'))
+        self.assertTrue(ClientUser.objects.filter(id='test_admin_user@test.tld', admin=True))
+        self.assertTrue(ClientUser.objects.filter(id='test_user@test.tld', admin=False))
+        self.assertTrue(ClientUser.objects.filter(id='test_user2@test.tld', admin=False))
 
     def test_object_recreation(self):
         self.client_request.post('/v1/resellers/',
