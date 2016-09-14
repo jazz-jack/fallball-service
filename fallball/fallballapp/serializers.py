@@ -5,7 +5,36 @@ from rest_framework import serializers as rest_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 
-from fallballapp.models import Client, ClientUser, Reseller
+from fallballapp.models import Application, Client, ClientUser, Reseller
+
+
+class AuthorizationSerializer(rest_serializers.HyperlinkedModelSerializer):
+    token = rest_serializers.SerializerMethodField()
+
+    def get_token(self, obj):
+        """
+        As token exists inside User object, we need to get it to show it with particular reseller
+        """
+        token = Token.objects.filter(user=obj.owner).first()
+        return token.key if token else None
+
+
+class ApplicationSerializer(AuthorizationSerializer):
+    url = rest_serializers.SerializerMethodField()
+
+    class Meta:
+        model = Application
+        fields = ('id', 'url', 'token')
+
+    def get_url(self, obj):
+        return 'https://{id}.connector.fallball.io/api/v1'.format(id=obj.id)
+
+    def create(self, validated_data):
+        if User.objects.filter(username=validated_data['id']).exists():
+            raise ValidationError('Application with such id is already created')
+
+        user = User.objects.create(username=validated_data['id'])
+        return Application.objects.create(owner=user, **validated_data)
 
 
 class StorageResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
@@ -22,14 +51,13 @@ class StorageResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
         return obj.get_usage()
 
 
-class ResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
+class ResellerSerializer(AuthorizationSerializer):
     storage = StorageResellerSerializer(source='*')
     clients_amount = rest_serializers.SerializerMethodField()
-    token = rest_serializers.SerializerMethodField()
 
     class Meta:
         model = Reseller
-        fields = ('id', 'token', 'clients_amount', 'storage')
+        fields = ('id', 'application', 'token', 'clients_amount', 'storage')
 
     def create(self, validated_data):
         """
@@ -44,13 +72,6 @@ class ResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     def get_clients_amount(self, obj):
         return obj.get_clients_amount()
-
-    def get_token(self, obj):
-        """
-        As token exists inside User object, we need to get it to show it with particular reseller
-        """
-        token = Token.objects.filter(user=obj.owner).first()
-        return token.key if token else None
 
 
 class StorageClientSerializer(rest_serializers.HyperlinkedModelSerializer):

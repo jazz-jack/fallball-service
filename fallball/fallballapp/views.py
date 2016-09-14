@@ -7,12 +7,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from fallballapp.models import Client, ClientUser, Reseller
-from fallballapp.serializers import (ClientSerializer, ClientUserSerializer,
-                                     ResellerSerializer)
+from fallballapp.models import Application, Client, ClientUser, Reseller
+from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
+                                     ClientUserSerializer, ResellerSerializer)
 from fallballapp.utils import (dump_exits, get_all_reseller_clients,
                                get_all_resellers, get_object_or_403, repair)
 
+
+class ApplicationViewSet(ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ApplicationSerializer
+    queryset = Application.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return ModelViewSet.create(self, request, *args, **kwargs)
+        return Response("Only superuser can create application", status=status.HTTP_403_FORBIDDEN)
 
 class ResellerViewSet(ModelViewSet):
     """
@@ -45,9 +56,10 @@ class ResellerViewSet(ModelViewSet):
         return Response("Only superuser can get resellers list", status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, *args, **kwargs):
-        if request.user.is_superuser:
+        reseller = Reseller.objects.filter(id=kwargs['pk'], owner=request.user)
+        if request.user.is_superuser or reseller:
             return ModelViewSet.retrieve(self, request, *args, **kwargs)
-        return Response("Only superuser can get reseller information",
+        return Response("Only superuser or reseller itself can get reseller information",
                         status=status.HTTP_403_FORBIDDEN)
 
     @detail_route(methods=['get'])
