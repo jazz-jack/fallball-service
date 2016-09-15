@@ -115,4 +115,4 @@ REST_FRAMEWORK = {
 }
 
 
-APP_DATA = os.path.join(BASE_DIR, 'fallballapp/fixtures/initial_data.json')
+APP_DATA = os.path.join(BASE_DIR, 'fallballapp/fixtures/app_data.json')
