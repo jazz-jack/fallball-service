@@ -57,18 +57,23 @@ class ResellerSerializer(AuthorizationSerializer):
 
     class Meta:
         model = Reseller
-        fields = ('id', 'application', 'token', 'clients_amount', 'storage')
+        fields = ('name', 'token', 'clients_amount', 'storage')
 
     def create(self, validated_data):
         """
         This method is overwritten in order to create User object and associate it with reseller.
         This operation is needed to create token for reseller
         """
-        if User.objects.filter(username=validated_data['id']).exists():
-            raise ValidationError('Reseller with such id is already created')
+        application_id = self.initial_data['application'].id
+        reseller_name = validated_data['name']
+        username = '{application_id}.{reseller_name}'.format(application_id=application_id,
+                                                           reseller_name=reseller_name)
 
-        user = User.objects.create(username=validated_data['id'])
-        return Reseller.objects.create(owner=user, **validated_data)
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Reseller with such name is already created')
+
+        user = User.objects.create(username=username)
+        return Reseller.objects.create(owner=user, application=self.initial_data['application'], **validated_data)
 
     def get_clients_amount(self, obj):
         return obj.get_clients_amount()
@@ -91,7 +96,7 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('id', 'creation_date', 'users_amount', 'storage')
+        fields = ('name', 'creation_date', 'users_amount', 'storage')
 
     def create(self, validated_data):
         """
@@ -116,12 +121,15 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
 
     class Meta:
         model = ClientUser
-        fields = ('id', 'client', 'password', 'storage', 'admin')
+        fields = ('email', 'client', 'password', 'storage', 'admin')
 
     def create(self, validated_data):
         # Usage is random but not more than limit
         usage = randint(0, validated_data['limit'])
-        user = User.objects.create_user(username=validated_data['id'],
+
+        username = '{application_id}.{email}'.format(application_id=self.initial_data['application_id'],
+                                                             email=validated_data['email'])
+        user = User.objects.create_user(username=username,
                                         password=validated_data['password'])
         return ClientUser.objects.create(usage=usage, user=user, **validated_data)
 

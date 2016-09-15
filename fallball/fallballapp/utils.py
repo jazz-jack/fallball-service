@@ -126,7 +126,7 @@ def prepare_dict_for_model(item):
     """
     Prepare some keys of dict to sent the dict for model creation
     """
-    for field in ['application', 'owner', 'reseller', 'client', 'user']:
+    for field in ['application', 'owner']:
         if field in item['fields']:
             item['fields']['{}_id'.format(field)] = item['fields'].pop(field)
 
@@ -141,3 +141,7 @@ def dump_exits(pk):
     if [item for item in data if item['pk'] == pk]:
         return True
     return False
+
+def get_app_username(app_id, username):
+    return '{application_id}.{username}'.format(application_id=app_id,
+                                                username=username)
