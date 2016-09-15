@@ -13,13 +13,14 @@ from fallballapp.utils import get_app_username
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
-        Token.objects.create(user=instance)
+        if not instance.is_superuser:
+            Token.objects.create(user=instance)
 
 
 @receiver(post_save, sender=Application)
 def load_fixtures(instance=None, created=False, **kwargs):
     if created:
-        with open(settings.INITIAL_DATA) as data_file:
+        with open(settings.APP_DATA) as data_file:
             data = json.load(data_file)
             for reseller_template in data:
                 username = get_app_username(instance.id, reseller_template['name'])

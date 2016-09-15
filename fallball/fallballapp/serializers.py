@@ -21,13 +21,13 @@ class AuthorizationSerializer(rest_serializers.HyperlinkedModelSerializer):
 
 
 class ApplicationSerializer(AuthorizationSerializer):
-    url = rest_serializers.SerializerMethodField()
+    entrypoint = rest_serializers.SerializerMethodField()
 
     class Meta:
         model = Application
-        fields = ('id', 'url', 'token')
+        fields = ('id', 'entrypoint', 'token')
 
-    def get_url(self, obj):
+    def get_entrypoint(self, obj):
         return 'https://{id}.connector.fallball.io/api/v1'.format(id=obj.id)
 
     def create(self, validated_data):
