@@ -5,7 +5,37 @@ from rest_framework import serializers as rest_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 
-from fallballapp.models import Client, ClientUser, Reseller
+from fallballapp.models import Application, Client, ClientUser, Reseller
+from fallballapp.utils import get_app_username
+
+
+class AuthorizationSerializer(rest_serializers.HyperlinkedModelSerializer):
+    token = rest_serializers.SerializerMethodField()
+
+    def get_token(self, obj):
+        """
+        As token exists inside User object, we need to get it to show it with particular reseller
+        """
+        token = Token.objects.filter(user=obj.owner).first()
+        return token.key if token else None
+
+
+class ApplicationSerializer(AuthorizationSerializer):
+    entrypoint = rest_serializers.SerializerMethodField()
+
+    class Meta:
+        model = Application
+        fields = ('id', 'entrypoint', 'token')
+
+    def get_entrypoint(self, obj):
+        return 'https://{}.connector.fallball.io/api/v1'.format(obj.id)
+
+    def create(self, validated_data):
+        if User.objects.filter(username=validated_data['id']).exists():
+            raise ValidationError('Application with such id is already created')
+
+        user = User.objects.create(username=validated_data['id'])
+        return Application.objects.create(owner=user, **validated_data)
 
 
 class StorageResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
@@ -22,35 +52,33 @@ class StorageResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
         return obj.get_usage()
 
 
-class ResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
+class ResellerSerializer(AuthorizationSerializer):
     storage = StorageResellerSerializer(source='*')
     clients_amount = rest_serializers.SerializerMethodField()
-    token = rest_serializers.SerializerMethodField()
 
     class Meta:
         model = Reseller
-        fields = ('id', 'token', 'clients_amount', 'storage')
+        fields = ('name', 'token', 'clients_amount', 'storage')
 
     def create(self, validated_data):
         """
         This method is overwritten in order to create User object and associate it with reseller.
         This operation is needed to create token for reseller
         """
-        if User.objects.filter(username=validated_data['id']).exists():
-            raise ValidationError('Reseller with such id is already created')
+        application_id = self.initial_data['application'].id
+        reseller_name = validated_data['name']
+        username = '{application_id}.{reseller_name}'.format(application_id=application_id,
+                                                             reseller_name=reseller_name)
 
-        user = User.objects.create(username=validated_data['id'])
-        return Reseller.objects.create(owner=user, **validated_data)
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('Reseller with such name is already created')
+
+        user = User.objects.create(username=username)
+        return Reseller.objects.create(owner=user, application=self.initial_data['application'],
+                                       **validated_data)
 
     def get_clients_amount(self, obj):
         return obj.get_clients_amount()
-
-    def get_token(self, obj):
-        """
-        As token exists inside User object, we need to get it to show it with particular reseller
-        """
-        token = Token.objects.filter(user=obj.owner).first()
-        return token.key if token else None
 
 
 class StorageClientSerializer(rest_serializers.HyperlinkedModelSerializer):
@@ -70,7 +98,7 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('id', 'creation_date', 'users_amount', 'storage')
+        fields = ('name', 'creation_date', 'users_amount', 'storage')
 
     def create(self, validated_data):
         """
@@ -95,12 +123,14 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
 
     class Meta:
         model = ClientUser
-        fields = ('id', 'client', 'password', 'storage', 'admin')
+        fields = ('email', 'client', 'password', 'storage', 'admin')
 
     def create(self, validated_data):
         # Usage is random but not more than limit
         usage = randint(0, validated_data['limit'])
-        user = User.objects.create_user(username=validated_data['id'],
+
+        username = get_app_username(self.initial_data['application_id'], validated_data['email'])
+        user = User.objects.create_user(username=username,
                                         password=validated_data['password'])
         return ClientUser.objects.create(usage=usage, user=user, **validated_data)
 

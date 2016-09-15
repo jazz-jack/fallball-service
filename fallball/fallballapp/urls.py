@@ -1,14 +1,18 @@
 from django.conf.urls import include, url
 from rest_framework_nested import routers
 
-from .views import (ClientUserViewSet, ClientViewSet, ResellerViewSet,
-                    UsersViewSet)
+from .views import (ApplicationViewSet, ClientUserViewSet, ClientViewSet,
+                    ResellerViewSet, UsersViewSet)
 
 router = routers.SimpleRouter()
-router.register(r'resellers', ResellerViewSet)
 
 # Route for UI authorization
 router.register(r'users', UsersViewSet)
+
+# Route for applications
+router.register(r'applications', ApplicationViewSet)
+
+router.register(r'resellers', ResellerViewSet)
 
 resellers_router = routers.NestedSimpleRouter(router, r'resellers', lookup='reseller')
 resellers_router.register(r'clients', ClientViewSet)

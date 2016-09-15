@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Client, ClientUser, Reseller
+from .models import Application, Client, ClientUser, Reseller
 
-fb_models = (Client, Reseller, ClientUser)
+fb_models = (Application, Client, Reseller, ClientUser)
 admin.site.register(fb_models)

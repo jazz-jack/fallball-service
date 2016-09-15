@@ -16,7 +16,7 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
 2. Load initial data
 
     ```
-    python manage.py loaddata dbdump
+    python manage.py loaddata initial_data
     ```
 
 3. Get admin token

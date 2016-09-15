@@ -3,15 +3,24 @@ from django.db import models
 from django.db.models import Sum
 
 
+class Application(models.Model):
+    id = models.CharField(max_length=150, primary_key=True)
+    owner = models.OneToOneField(User)
+
+
 class Reseller(models.Model):
-    id = models.CharField(max_length=120, primary_key=True)
+    name = models.CharField(max_length=120)
+    application = models.ForeignKey(Application)
     limit = models.IntegerField()
     # owner property is a foreign key related to User instance
     # It is needed to use token authorization
-    owner = models.OneToOneField(User)
+    owner = models.ForeignKey(User)
+
+    class Meta:
+        unique_together = ('application', 'name')
 
     def __str__(self):
-        return 'Reseller {id}'.format(id=self.id)
+        return 'Reseller {name}'.format(name=self.name)
 
     def get_clients_amount(self):
         """
@@ -31,15 +40,18 @@ class Reseller(models.Model):
 
 class Client(models.Model):
     # Instance_id contains company name and used as client id
-    id = models.CharField(max_length=150, primary_key=True)
+    name = models.CharField(max_length=150)
     creation_date = models.DateTimeField(auto_now_add=True)
     limit = models.IntegerField()
 
     # Every client belongs to particular reseller
     reseller = models.ForeignKey(Reseller)
 
+    class Meta:
+        unique_together = ('reseller', 'name')
+
     def __str__(self):
-        return 'Client {id}'.format(id=self.id)
+        return 'Client {}'.format(self.name)
 
     def get_usage(self):
         """
@@ -57,7 +69,7 @@ class Client(models.Model):
 
 class ClientUser(models.Model):
     # email field contains user email and used as user id
-    id = models.EmailField(primary_key=True)
+    email = models.EmailField()
     user = models.OneToOneField(User)
     password = models.CharField(max_length=12)
     usage = models.IntegerField(blank=True)
@@ -66,5 +78,8 @@ class ClientUser(models.Model):
     # Every user belongs to particular client
     client = models.ForeignKey(Client)
 
+    class Meta:
+        unique_together = ('client', 'email')
+
     def __str__(self):
-        return 'ClientUser {id}'.format(id=self.id)
+        return 'ClientUser {}'.format(self.email)
