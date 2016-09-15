@@ -7,13 +7,14 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 from fallballapp.models import Application, Reseller, Client, ClientUser
-from fallballapp.utils import prepare_dict_for_model, get_app_username
+from fallballapp.utils import get_app_username
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
 
 @receiver(post_save, sender=Application)
 def load_fixtures(instance=None, created=False, **kwargs):
@@ -40,6 +41,4 @@ def load_fixtures(instance=None, created=False, **kwargs):
                                 owner = User.objects.create(username=username)
                                 params = dict.copy(user_template)
                                 params.pop('users', None)
-                                ClientUser.objects.create(client=client,user=owner, **params)
-
-
+                                ClientUser.objects.create(client=client, user=owner, **params)

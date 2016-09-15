@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
+from fallballapp.utils import get_app_username
 
 
 class AuthorizationSerializer(rest_serializers.HyperlinkedModelSerializer):
@@ -67,13 +68,14 @@ class ResellerSerializer(AuthorizationSerializer):
         application_id = self.initial_data['application'].id
         reseller_name = validated_data['name']
         username = '{application_id}.{reseller_name}'.format(application_id=application_id,
-                                                           reseller_name=reseller_name)
+                                                             reseller_name=reseller_name)
 
         if User.objects.filter(username=username).exists():
             raise ValidationError('Reseller with such name is already created')
 
         user = User.objects.create(username=username)
-        return Reseller.objects.create(owner=user, application=self.initial_data['application'], **validated_data)
+        return Reseller.objects.create(owner=user, application=self.initial_data['application'],
+                                       **validated_data)
 
     def get_clients_amount(self, obj):
         return obj.get_clients_amount()
@@ -127,8 +129,7 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
         # Usage is random but not more than limit
         usage = randint(0, validated_data['limit'])
 
-        username = '{application_id}.{email}'.format(application_id=self.initial_data['application_id'],
-                                                             email=validated_data['email'])
+        username = get_app_username(self.initial_data['application_id'], validated_data['email'])
         user = User.objects.create_user(username=username,
                                         password=validated_data['password'])
         return ClientUser.objects.create(usage=usage, user=user, **validated_data)

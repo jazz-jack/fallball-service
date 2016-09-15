@@ -142,6 +142,7 @@ def dump_exits(pk):
         return True
     return False
 
+
 def get_app_username(app_id, username):
     return '{application_id}.{username}'.format(application_id=app_id,
                                                 username=username)

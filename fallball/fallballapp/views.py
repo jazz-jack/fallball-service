@@ -82,7 +82,7 @@ class ResellerViewSet(ModelViewSet):
         reseller = get_object_or_403(Reseller, application=application, name=kwargs['name'])
 
         if application:
-            queryset = [reseller,]
+            queryset = [reseller, ]
             serializer = ResellerSerializer(queryset, many=True)
             return Response(serializer.data)
         return Response("Authentication failed",
@@ -159,7 +159,6 @@ class ClientViewSet(ModelViewSet):
             return Response("Reseller limit is reached", status=status.HTTP_400_BAD_REQUEST)
         return Response("Such client already exists", status=status.HTTP_400_BAD_REQUEST)
 
-
     def list(self, request, **kwargs):
         """
         Return list of clients which owned by particular reseller
@@ -196,7 +195,8 @@ class ClientViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         application = get_object_or_403(Application, owner=request.user)
         if application:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'], application=application)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application)
             client = Client.objects.filter(name=kwargs['name'], reseller=reseller).first()
             if client:
                 client.delete()
@@ -311,11 +311,11 @@ class ClientUserViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         application=application)
+            get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                              application=application)
         else:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         owner=request.user)
+            get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                              owner=request.user)
 
         return ModelViewSet.retrieve(self, request, *args, **kwargs)
 
