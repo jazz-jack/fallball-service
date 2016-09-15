@@ -36,6 +36,7 @@ setup(
     author_email='apslite@odin.com',
     packages=find_packages('fallball'),
     package_dir={'': 'fallball'},
+    include_package_data=True,
     test_suite="fallball.runtests",
     url='https://fallball.io',
     license='Apache License',
