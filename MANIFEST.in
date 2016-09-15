@@ -2,3 +2,4 @@ include README.md
 include version.txt
 include requirements.txt
 include test-requirements.txt
+recursive-include fallball/fallballapp/fixtures/ *
