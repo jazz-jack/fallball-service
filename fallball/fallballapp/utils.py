@@ -41,7 +41,7 @@ def _get_dump():
 
 
 def is_model(obj, model):
-    if obj['model'] == 'fallballapp.{model}'.format(model=model):
+    if obj['model'] == 'fallballapp.{}'.format(model):
         return True
     return False
 
@@ -126,7 +126,7 @@ def prepare_dict_for_model(item):
     """
     Prepare some keys of dict to sent the dict for model creation
     """
-    for field in ['application', 'owner']:
+    for field in ('application', 'owner'):
         if field in item['fields']:
             item['fields']['{}_id'.format(field)] = item['fields'].pop(field)
 
@@ -144,5 +144,4 @@ def dump_exits(pk):
 
 
 def get_app_username(app_id, username):
-    return '{application_id}.{username}'.format(application_id=app_id,
-                                                username=username)
+    return '{}.{}'.format(app_id, username)

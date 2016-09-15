@@ -11,7 +11,7 @@ from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer)
 from fallballapp.utils import (dump_exits, get_all_reseller_clients,
-                               get_all_resellers, get_object_or_403, repair)
+                               get_all_resellers, get_app_username, get_object_or_403, repair)
 
 
 class ApplicationViewSet(ModelViewSet):
@@ -28,17 +28,17 @@ class ApplicationViewSet(ModelViewSet):
     def list(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return ModelViewSet.list(self, request, *args, **kwargs)
-        return Response("Authentication failed", status=status.HTTP_403_FORBIDDEN)
+        return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return ModelViewSet.retrieve(self, request, *args, **kwargs)
-        return Response("Authentication failed", status=status.HTTP_403_FORBIDDEN)
+        return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return ModelViewSet.destroy(self, request, *args, **kwargs)
-        return Response("Authentication failed", status=status.HTTP_403_FORBIDDEN)
+        return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
 
 
 class ResellerViewSet(ModelViewSet):
@@ -58,35 +58,35 @@ class ResellerViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         application = get_object_or_403(Application, owner=request.user)
-        if application:
-            Reseller.objects.filter(name=kwargs['name'], application=application).delete()
-            username = '{application_id}.{reseller_name}'.format(reseller_name=kwargs['name'],
-                                                                 application_id=application.id)
-            User.objects.filter(username=username).delete()
-            return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
-        return Response("Authentication failed", status=status.HTTP_403_FORBIDDEN)
+        if not application:
+            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+        Reseller.objects.filter(name=kwargs['name'], application=application).delete()
+        username = get_app_username(kwargs['name'], application.id)
+        User.objects.filter(username=username).delete()
+        return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request, *args, **kwargs):
         """
         Method is overwritten in order to implement superuser check
         """
         application = get_object_or_403(Application, owner=request.user)
-        if application:
-            queryset = Reseller.objects.filter(application=application)
-            serializer = ResellerSerializer(queryset, many=True)
-            return Response(serializer.data)
-        return Response("Authentication failed", status=status.HTTP_403_FORBIDDEN)
+        if not application:
+            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+        queryset = Reseller.objects.filter(application=application)
+        serializer = ResellerSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         application = get_object_or_403(Application, owner=request.user)
         reseller = get_object_or_403(Reseller, application=application, name=kwargs['name'])
 
-        if application:
-            queryset = [reseller, ]
-            serializer = ResellerSerializer(queryset, many=True)
-            return Response(serializer.data)
-        return Response("Authentication failed",
-                        status=status.HTTP_403_FORBIDDEN)
+        if not application:
+            return Response("Authorization failed",
+                            status=status.HTTP_403_FORBIDDEN)
+        queryset = [reseller, ]
+        serializer = ResellerSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
     @detail_route(methods=['get'])
     def reset(self, request, *args, **kwargs):
@@ -114,17 +114,16 @@ class ResellerViewSet(ModelViewSet):
         """
         application = get_object_or_403(Application, owner=request.user)
 
-        if application:
+        if not application:
+            return Response("Only superuser can repair all resellers", status=status.HTTP_403_FORBIDDEN)
+        # Delete all existed resellers prior to reparing:
+        Reseller.objects.all().delete()
 
-            # Delete all existed resellers prior to reparing:
-            Reseller.objects.all().delete()
-
-            # Get list of available resellers from dump and repair one by one
-            resellers = get_all_resellers()
-            for reseller in resellers:
-                repair(Reseller, reseller['pk'])
-            return Response("All resellers has been repaired", status=status.HTTP_200_OK)
-        return Response("Only superuser can repair all resellers", status=status.HTTP_403_FORBIDDEN)
+        # Get list of available resellers from dump and repair one by one
+        resellers = get_all_resellers()
+        for reseller in resellers:
+            repair(Reseller, reseller['pk'])
+        return Response("All resellers has been repaired", status=status.HTTP_200_OK)
 
 
 class ClientViewSet(ModelViewSet):
@@ -194,15 +193,15 @@ class ClientViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         application = get_object_or_403(Application, owner=request.user)
-        if application:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               application=application)
-            client = Client.objects.filter(name=kwargs['name'], reseller=reseller).first()
-            if client:
-                client.delete()
-                return Response('Client has been deleted', status=status.HTTP_204_NO_CONTENT)
-            return Response('Such client does not exist', status=status.HTTP_400_BAD_REQUEST)
-        return Response("Authentication failed", status=status.HTTP_403_FORBIDDEN)
+        if not application:
+            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+        reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                           application=application)
+        client = Client.objects.filter(name=kwargs['name'], reseller=reseller).first()
+        if client:
+            client.delete()
+            return Response('Client has been deleted', status=status.HTTP_204_NO_CONTENT)
+        return Response('Such client does not exist', status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['get'])
     def reset(self, request, *args, **kwargs):
@@ -269,20 +268,20 @@ class ClientUserViewSet(ModelViewSet):
         # get client to provide it for user creation
         client = Client.objects.filter(reseller=reseller,
                                        name=kwargs['client_name']).first()
-        if client:
-            # Check if client has free space for new user
-            free_space = client.limit - client.get_usage()
-            if free_space >= request.data['storage']['limit']:
-                request.data['client'] = client.id
-                request.data['application_id'] = application.id
-                if 'admin' not in request.data:
-                    request.data['admin'] = False
+        if not client:
+            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
 
-                return ModelViewSet.create(self, request, *args, **kwargs)
+        # Check if client has free space for new user
+        free_space = client.limit - client.get_usage()
+        if free_space >= request.data['storage']['limit']:
+            request.data['client'] = client.id
+            request.data['application_id'] = application.id
+            if 'admin' not in request.data:
+                request.data['admin'] = False
 
-            return Response("Client limit is reached", status=status.HTTP_400_BAD_REQUEST)
-        return Response("Authentication failed",
-                        status=status.HTTP_403_FORBIDDEN)
+            return ModelViewSet.create(self, request, *args, **kwargs)
+
+        return Response("Client limit is reached", status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         if request.user.is_superuser:

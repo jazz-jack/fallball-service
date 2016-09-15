@@ -28,7 +28,7 @@ class ApplicationSerializer(AuthorizationSerializer):
         fields = ('id', 'entrypoint', 'token')
 
     def get_entrypoint(self, obj):
-        return 'https://{id}.connector.fallball.io/api/v1'.format(id=obj.id)
+        return 'https://{}.connector.fallball.io/api/v1'.format(obj.id)
 
     def create(self, validated_data):
         if User.objects.filter(username=validated_data['id']).exists():

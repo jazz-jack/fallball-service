@@ -51,7 +51,7 @@ class Client(models.Model):
         unique_together = ('reseller', 'name')
 
     def __str__(self):
-        return 'Client {name}'.format(name=self.name)
+        return 'Client {}'.format(self.name)
 
     def get_usage(self):
         """
@@ -82,4 +82,4 @@ class ClientUser(models.Model):
         unique_together = ('client', 'email')
 
     def __str__(self):
-        return 'ClientUser {email}'.format(email=self.email)
+        return 'ClientUser {}'.format(self.email)
