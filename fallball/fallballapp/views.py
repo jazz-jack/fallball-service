@@ -87,7 +87,6 @@ class ResellerViewSet(ModelViewSet):
         serializer = ResellerSerializer(queryset, many=True)
         return Response(serializer.data)
 
-
     @detail_route(methods=['get'])
     def reset(self, request, *args, **kwargs):
         """
@@ -115,7 +114,8 @@ class ResellerViewSet(ModelViewSet):
         application = get_object_or_403(Application, owner=request.user)
 
         if not application:
-            return Response("Only superuser can repair all resellers", status=status.HTTP_403_FORBIDDEN)
+            return Response("Only superuser can repair all resellers",
+                            status=status.HTTP_403_FORBIDDEN)
         # Delete all existed resellers prior to reparing:
         Reseller.objects.all().delete()
 

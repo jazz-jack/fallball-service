@@ -21,7 +21,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 def load_fixtures(instance=None, created=False, **kwargs):
     if not created:
         return
-    
+
     with open(settings.APP_DATA) as data_file:
         data = json.load(data_file)
         for reseller_template in data:
