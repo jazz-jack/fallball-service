@@ -1,4 +1,6 @@
 import os
+import random
+import string
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -70,8 +72,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'fallball',
-        'USER': 'root',
-        'PASSWORD': 'password'
+        'USER': 'fallball',
+        'PORT': '3306',
+        'TEST': {
+            'NAME': 'test_fallball_{}'.format(''.join(random.SystemRandom().choice(
+                string.ascii_uppercase + string.digits) for _ in range(8))),
+        }
     }
 }
 
