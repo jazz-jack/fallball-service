@@ -46,3 +46,7 @@ class BaseTestCase(TestCase):
 
         self.assertTrue(Application.objects.filter(id='tricky_chicken'))
         self.assertTrue(Application.objects.filter(id='tricky_chicken_2'))
+
+    def test_object(self):
+        import ipdb; ipdb.set_trace()
+        self.assertTrue(Application.objects.filter(id='tricky_chicken'))

@@ -12,7 +12,6 @@ pip install -r test-requirements.txt
 mv fallball/fallball/settings_fallball.py fallball/fallball/settings.py
 
 python setup.py flake8
-python setup.py test
 
 deactivate
 rm -rf env
