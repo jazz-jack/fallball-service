@@ -10,8 +10,6 @@ install:
   - pip install -r test-requirements.txt
 services:
   - mysql
-before_script:
-  - mysql -e 'create database fallball_test'
 script:
   - mv fallball/fallball/fallball_settings.py fallball/fallball/settings.py
   - python setup.py flake8
