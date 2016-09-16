@@ -13,7 +13,7 @@ services:
 before_script:
   - mysql -e 'create database fallball_test'
 script:
-  - mv fallball/fallball/settings_fallball.py fallball/fallball/settings.py
+  - mv fallball/fallball/fallball_settings.py fallball/fallball/settings.py
   - python setup.py flake8
   - coverage run --source=fallball setup.py test
 notifications:
