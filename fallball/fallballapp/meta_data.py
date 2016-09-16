@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import User
 
 from fallballapp.models import Reseller, Client, ClientUser
@@ -10,38 +12,38 @@ data = [
         'clients': [
             {
                 'name': 'MadRobots',
-                'creation_date': '2016-09-14T08:20:25.881Z',
+                'creation_date': datetime.now(),
                 'limit': 40
             },
             {
                 'name': 'MyDevs',
-                'creation_date': '2016-09-14T08:21:24.041Z',
+                'creation_date': datetime.now(),
                 'limit': 30
             },
             {
                 'name': 'SunnyFlowers',
-                'creation_date': '2016-09-14T08:20:13.737Z',
+                'creation_date': datetime.now(),
                 'limit': 50,
                 'users': [
                     {
                         'email': 'johnson@sunnyflowers.tld',
                         'usage': 3,
                         'admin': False,
-                        'password': '123qwe123',
+                        'password': 'password',
                         'limit': 5
                     },
                     {
                         'email': 'brown@sunnyflowers.tld',
                         'usage': 2,
                         'admin': False,
-                        'password': '123qwe123',
+                        'password': 'password',
                         'limit': 6
                     },
                     {
                         'email': 'williams@sunnyflowers.tld',
                         'usage': 1,
                         'admin': True,
-                        'password': '123qwe123',
+                        'password': 'password',
                         'limit': 4
                     }
                 ]
