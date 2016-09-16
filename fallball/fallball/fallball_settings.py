@@ -12,7 +12,6 @@ DEBUG = True
 ALLOWED_HOSTS = (
 )
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -62,7 +61,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fallball.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
@@ -70,8 +68,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'fallball',
-        'USER': 'fallball',
-        'PORT': '3306'
+        'USER': 'root',
+        'PORT': '3306',
+        'PASSWORD': '',
+        'TEST': {
+            'NAME': 'fallball_test'
+        }
     }
 }
 
@@ -93,7 +95,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -107,7 +108,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
@@ -115,6 +115,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'fallballapp.pagination.PageNumberPaginationDataOnly',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
 }
-
 
 APP_DATA = os.path.join(BASE_DIR, 'fallballapp/fixtures/app_data.json')
