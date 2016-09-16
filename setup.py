@@ -1,6 +1,7 @@
 import os
 import time
 from os.path import join, dirname, abspath
+import pbr.packaging
 from setuptools import find_packages, setup
 
 PACKAGE_VERSION = '0.1'
@@ -29,6 +30,7 @@ def version():
     with version_file() as verfile:
         return verfile.readline().strip()
 
+
 setup(
     name='fallball',
     version=version(),
@@ -37,6 +39,7 @@ setup(
     packages=find_packages('fallball'),
     package_dir={'': 'fallball'},
     include_package_data=True,
+    install_requires=pbr.packaging.parse_requirements(['requirements.txt']),
     test_suite="fallball.runtests",
     url='https://fallball.io',
     license='Apache License',
