@@ -9,6 +9,7 @@ virtualenv -p python3.4 env
 
 pip install -r test-requirements.txt
 python setup.py flake8
+python setup.py test
 
 deactivate
 rm -rf env
