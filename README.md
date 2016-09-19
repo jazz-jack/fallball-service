@@ -11,17 +11,14 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     python manage.py migrate
     ```
-
 2. Load initial data
     ```
     python manage.py loaddata initial_data
     ```
-
 3. Admin token
     ```
     d8cc06c05a6cd5d5b6156fd2eb963a6f1fdd039c
     ```
-
 ## Run
 In order to run server you need to execute the following command from the root folder of the project:
 
