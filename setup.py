@@ -48,5 +48,5 @@ setup(
     url='https://fallball.io',
     license='Apache License',
     description='Dummy file sharing service available by REST api.',
-    long_description=open('README.md').read(),
+    long_description=open(join(dirname(abspath(__file__)), 'README.md')).read(),
 )
