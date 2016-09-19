@@ -123,7 +123,7 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
 
     class Meta:
         model = ClientUser
-        fields = ('email', 'client', 'password', 'storage', 'admin')
+        fields = ('email', 'password', 'storage', 'admin')
 
     def create(self, validated_data):
         # Usage is random but not more than limit

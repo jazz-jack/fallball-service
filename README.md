@@ -8,28 +8,16 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
 
 ## How To Deploy
 1. Create application database:
-  
     ```
     python manage.py migrate
     ```
-
 2. Load initial data
-
     ```
     python manage.py loaddata initial_data
     ```
-
-3. Get admin token
-
+3. Admin token
     ```
-    python manage.py shell
-    ```
-    ```python
-    from django.contrib.auth.models import User 
-    from rest_framework.authtoken.models import Token
-    a = User.objects.filter(username='admin')
-    Token.objects.filter(user=a)
-    [<Token: 4395ef69e0701a85866485e57ad40fab167bd544>]
+    d8cc06c05a6cd5d5b6156fd2eb963a6f1fdd039c
     ```
 
 ## Run
@@ -45,3 +33,6 @@ To run tests simply execute the following command:
 ```
 python manage.py test fallballapp.tests
 ```
+
+## API Reference
+In order to explore API description follow to [apiary](http://docs.fallball.apiary.io/) page
