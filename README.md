@@ -33,3 +33,6 @@ To run tests simply execute the following command:
 ```
 python manage.py test fallballapp.tests
 ```
+
+## API Reference
+In order to explore API description follow to [apiary](http://docs.fallball.apiary.io/) page
