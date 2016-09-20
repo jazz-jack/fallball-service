@@ -192,11 +192,13 @@ class ClientViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        application = get_object_or_403(Application, owner=request.user)
-        if not application:
-            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
-        reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                           application=application)
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         application=application)
+        else:
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         owner=request.user)
         client = Client.objects.filter(name=kwargs['name'], reseller=reseller).first()
         if client:
             client.delete()
@@ -274,8 +276,8 @@ class ClientUserViewSet(ModelViewSet):
         # Check if client has free space for new user
         free_space = client.limit - client.get_usage()
         if free_space >= request.data['storage']['limit']:
-            request.data['client'] = client.id
-            request.data['application_id'] = application.id
+            request.data['client'] = client
+            request.data['application_id'] = reseller.application.id
             if 'admin' not in request.data:
                 request.data['admin'] = False
 
@@ -284,14 +286,22 @@ class ClientUserViewSet(ModelViewSet):
         return Response("Client limit is reached", status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            get_object_or_403(Reseller, pk=kwargs['reseller_pk'])
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         application=application)
         else:
-            get_object_or_403(Reseller, pk=kwargs['reseller_pk'], owner=request.user)
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         owner=request.user)
 
-        ClientUser.objects.filter(id=kwargs['pk']).delete()
-        User.objects.filter(username=kwargs['pk']).delete()
-        return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
+        client_user = ClientUser.objects.filter(email=kwargs['email']).first()
+        if client_user.client.reseller == reseller:
+            client_user.delete()
+            User.objects.filter(username='{}.{}'.format(reseller.application.id,
+                                                        kwargs['email'])).delete()
+            return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
 
     def list(self, request, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
