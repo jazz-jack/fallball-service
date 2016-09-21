@@ -78,14 +78,14 @@ class ResellerViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         application = get_object_or_403(Application, owner=request.user)
-        reseller = get_object_or_403(Reseller, application=application, name=kwargs['name'])
+        reseller = get_object_or_404(Reseller, application=application, name=kwargs['name'])
 
         if not application:
             return Response("Authorization failed",
                             status=status.HTTP_403_FORBIDDEN)
         queryset = [reseller, ]
         serializer = ResellerSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data[0])
 
     @detail_route(methods=['get'])
     def reset(self, request, *args, **kwargs):
@@ -187,9 +187,12 @@ class ClientViewSet(ModelViewSet):
         else:
             reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
                                          owner=request.user)
-        queryset = Client.objects.filter(reseller=reseller, name=kwargs['name'])
+        client = Client.objects.filter(reseller=reseller, name=kwargs['name'])
+        if not client:
+            return Response("Client does not exist", status=status.HTTP_404_NOT_FOUND)
+        queryset = client
         serializer = ClientSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data[0])
 
     def destroy(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
@@ -320,13 +323,19 @@ class ClientUserViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                              application=application)
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         application=application)
         else:
-            get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                              owner=request.user)
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         owner=request.user)
 
-        return ModelViewSet.retrieve(self, request, *args, **kwargs)
+        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
+        client_user = ClientUser.objects.filter(client=client, email=kwargs['email'])
+        if not client_user:
+            return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
+        queryset = client_user
+        serializer = ClientUserSerializer(queryset, many=True)
+        return Response(serializer.data[0])
 
 
 class UsersViewSet(ModelViewSet):
