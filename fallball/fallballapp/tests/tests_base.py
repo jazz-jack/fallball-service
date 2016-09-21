@@ -166,3 +166,19 @@ class BaseTestCase(TestCase):
                             content_type='application/json')
 
         self.assertFalse(Client.objects.filter(name='new_client2'))
+
+    def test_not_found_objects(self):
+        app = Application.objects.all().first()
+        client_request = _get_client(app.owner.id)
+
+        reseller_code = client_request.get('/v1/resellers/not_found_reseller/',
+                                           content_type='application/json').status_code
+
+        reseller = Reseller.objects.all().first()
+
+        client_code = client_request.get('/v1/resellers/{}/clients/'
+                                         'not_found_client/'.format(reseller.name),
+                                         content_type='application/json').status_code
+
+        self.assertTrue(reseller_code == 404)
+        self.assertTrue(client_code == 404)
