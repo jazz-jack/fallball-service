@@ -7,6 +7,9 @@ class Application(models.Model):
     id = models.CharField(max_length=150, primary_key=True)
     owner = models.OneToOneField(User)
 
+    def __str__(self):
+        return self.id
+
 
 class Reseller(models.Model):
     name = models.CharField(max_length=120)
@@ -20,7 +23,7 @@ class Reseller(models.Model):
         unique_together = ('application', 'name')
 
     def __str__(self):
-        return 'Reseller {name}'.format(name=self.name)
+        return self.name
 
     def get_clients_amount(self):
         """
@@ -51,7 +54,7 @@ class Client(models.Model):
         unique_together = ('reseller', 'name')
 
     def __str__(self):
-        return 'Client {}'.format(self.name)
+        return self.name
 
     def get_usage(self):
         """
@@ -68,18 +71,16 @@ class Client(models.Model):
 
 
 class ClientUser(models.Model):
-    # email field contains user email and used as user id
     email = models.EmailField()
     user = models.OneToOneField(User)
     password = models.CharField(max_length=12)
     usage = models.IntegerField(blank=True)
     admin = models.BooleanField(default=False)
     limit = models.IntegerField()
-    # Every user belongs to particular client
     client = models.ForeignKey(Client)
 
     class Meta:
         unique_together = ('client', 'email')
 
     def __str__(self):
-        return 'ClientUser {}'.format(self.email)
+        return self.email

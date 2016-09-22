@@ -297,7 +297,7 @@ class ClientUserViewSet(ModelViewSet):
             reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
                                          owner=request.user)
 
-        client_user = ClientUser.objects.filter(email=kwargs['email']).first()
+        client_user = get_object_or_404(ClientUser, email=kwargs['email'])
         if client_user.client.reseller == reseller:
             client_user.delete()
             User.objects.filter(username='{}.{}'.format(reseller.application.id,
