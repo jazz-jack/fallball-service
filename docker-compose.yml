@@ -17,7 +17,6 @@ services:
     env_file:
      - database.env
     command: dockerize -wait tcp://fbdb:3306 -timeout 30s python manage.py runserver 0.0.0.0:8002
-    #command: python -m SimpleHTTPServer
     depends_on:
      - fbdb
     environment:
