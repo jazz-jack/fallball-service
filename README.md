@@ -6,7 +6,7 @@
 FallBall is the best in class file sharing service that offers cloud storage and file synchronization for small and medium businesses (SMBs) worldwide.
 This dummy service helps developers to learn [APS Lite](http://aps.odin.com) technology 
 
-## How To Deploy
+## Manual Deploy
 1. Create application database:
     ```
     python manage.py migrate
@@ -15,17 +15,32 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     python manage.py loaddata initial_data
     ```
-3. Admin token
+
+3. Copy and edit config according your needs:
+    ```
+    cp fallball/fallball_settings.py fallball/settings.py
+    ```
+
+4. In order to run server you need to execute the following command from the root folder of the project:
+    ```
+    python manage.py runserver <host_name>:<port>
+    ```
+
+## Deploy into docker container
+1. Run docker-compose:
+    ```
+    docker-compose up
+    ```
+
+2. Run kickstart script:
+    ```
+    docker exec -it fallballapp bash kickstart.sh
+    ```
+
+Admin token:
     ```
     d8cc06c05a6cd5d5b6156fd2eb963a6f1fdd039c
     ```
-
-## Run
-In order to run server you need to execute the following command from the root folder of the project:
-
-```
-python manage.py runserver <host_name>:<port>
-```
 
 ## Tests
 To run tests simply execute the following command:
