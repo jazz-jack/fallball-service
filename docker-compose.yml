@@ -16,7 +16,7 @@ services:
     container_name: fallballapp
     env_file:
      - database.env
-    command: dockerize -wait tcp://fbdb:3306 -timeout 30s python manage.py runserver 0.0.0.0:8002
+    command: dockerize -wait tcp://fbdb:3306 -timeout 45s python manage.py runserver 0.0.0.0:8002
     depends_on:
      - fbdb
     environment:
