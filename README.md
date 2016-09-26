@@ -35,6 +35,10 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     docker-compose up
     ```
+3. Run kickstart script:
+    ```
+    docker exec -it fallballapp bash kickstart.sh
+    ```
 
 Admin token:
     ```
