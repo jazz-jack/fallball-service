@@ -31,23 +31,7 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     cp fallball/fallball_settings.py fallball/settings.py
     ```
-2. Build images:
-    ```
-    docker-compose build
-    ```
-3. 2. Create containers:
-    ```
-    docker-compose create
-    ```
-2. Start containers:
-    ```
-    docker start fbdb && docker start fallballapp
-    ```
-3. Run kickstart script:
-    ```
-    docker exec -it fallballapp bash kickstart.sh
-    ```
-4. Run docker-compose:
+2. Run docker-compose:
     ```
     docker-compose up
     ```
