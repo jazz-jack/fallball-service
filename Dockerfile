@@ -10,4 +10,3 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 ADD requirements.txt /app/
 RUN pip install -r requirements.txt
-CMD cp fallball/fallball_settings.py fallball/settings.py

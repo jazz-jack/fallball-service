@@ -27,12 +27,15 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
 
 ## Deploy into docker container
-1. Run docker-compose:
+1. Copy and edit config according your needs:
+    ```
+    cp fallball/fallball_settings.py fallball/settings.py
+    ```
+2. Run docker-compose:
     ```
     docker-compose up
     ```
-
-2. Run kickstart script:
+3. Run kickstart script:
     ```
     docker exec -it fallballapp bash kickstart.sh
     ```
