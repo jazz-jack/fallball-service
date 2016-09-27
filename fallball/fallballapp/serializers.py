@@ -133,7 +133,3 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
                                         password=validated_data['password'])
         return ClientUser.objects.create(usage=usage, user=user,
                                          client=self.initial_data['client'], **validated_data)
-
-
-class UserSerializer(rest_serializers.ModelSerializer):
-    pass

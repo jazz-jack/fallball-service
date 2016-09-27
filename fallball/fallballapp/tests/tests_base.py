@@ -25,7 +25,6 @@ class BaseTestCase(TestCase):
     """
     Test basic operations: model objects create/delete
     """
-
     def setUp(self):
         admin = User.objects.filter(username='admin').first()
         if not admin:
@@ -182,3 +181,18 @@ class BaseTestCase(TestCase):
 
         self.assertTrue(reseller_code == 404)
         self.assertTrue(client_code == 404)
+
+    def test_jwt_token(self):
+        reseller = Reseller.objects.all().first()
+        client_request = _get_client(reseller.owner)
+
+        client_user = ClientUser.objects.filter().first()
+        res_name = reseller.name
+        client_name = client_user.client.name
+        email = client_user.email
+
+        code = client_request.get('/v1/resellers/{}/clients/{}/users/{}/token/'.format(res_name,
+                                                                                       client_name,
+                                                                                       email),
+                                  content_type='application/json').status_code
+        self.assertTrue(code == 200)

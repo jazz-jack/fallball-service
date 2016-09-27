@@ -6,12 +6,12 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_jwt.settings import api_settings
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer)
-from fallballapp.utils import (dump_exits, get_all_reseller_clients,
-                               get_all_resellers, get_app_username, get_object_or_403, repair)
+from fallballapp.utils import (get_app_username, get_object_or_403)
 
 
 class ApplicationViewSet(ModelViewSet):
@@ -92,19 +92,7 @@ class ResellerViewSet(ModelViewSet):
         """
         Repair particular reseller
         """
-        application = get_object_or_403(Application, owner=request.user)
-
-        if application:
-            reseller = get_object_or_404(Reseller, pk=kwargs['pk'])
-        else:
-            reseller = get_object_or_403(Reseller, pk=kwargs['pk'], owner=request.user)
-
-        # Check if reseller exists in database
-        if dump_exits(reseller.pk):
-            repair(Reseller, reseller.pk)
-            return Response("All clients has been repaired", status=status.HTTP_200_OK)
-        return Response("This reseller cannot be repaired",
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @list_route(methods=['get'])
     def reset_all(self, request, *args, **kwargs):
@@ -119,11 +107,7 @@ class ResellerViewSet(ModelViewSet):
         # Delete all existed resellers prior to reparing:
         Reseller.objects.all().delete()
 
-        # Get list of available resellers from dump and repair one by one
-        resellers = get_all_resellers()
-        for reseller in resellers:
-            repair(Reseller, reseller['pk'])
-        return Response("All resellers has been repaired", status=status.HTTP_200_OK)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ClientViewSet(ModelViewSet):
@@ -213,40 +197,14 @@ class ClientViewSet(ModelViewSet):
         """
         Recreate client to initial state
         """
-        if request.user.is_superuser:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'])
-        else:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'], owner=request.user)
-
-        # Check that client belongs to particular reseller
-        get_object_or_404(Client, reseller=reseller, pk=kwargs['pk'])
-        try:
-            repair(Client, kwargs['pk'])
-        except:
-            return Response("This client cannot be repaired",
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response("Client has been repaired", status=status.HTTP_200_OK)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @list_route(methods=['get'])
     def reset_all(self, request, *args, **kwargs):
         """
         Recreate all reseller clients to initial state
         """
-        if request.user.is_superuser:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'])
-        else:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'], owner=request.user)
-
-        clients = get_all_reseller_clients(kwargs['reseller_pk'])
-        if not clients:
-            return Response("There are no clients to repair",
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # Delete all reseller clients
-        Client.objects.filter(reseller=reseller).delete()
-        for client in clients:
-            repair(Client, client['pk'])
-        return Response("All clients has been repaired", status=status.HTTP_200_OK)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ClientUserViewSet(ModelViewSet):
@@ -259,7 +217,7 @@ class ClientUserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     lookup_field = 'email'
     # Redefine regex in order to get user email as id
-    lookup_value_regex = '[^@]+@[^@]+\.[^@]+'
+    lookup_value_regex = '[^@]+@[^@]+\.[^@][^/]+'
 
     def create(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
@@ -336,6 +294,27 @@ class ClientUserViewSet(ModelViewSet):
         queryset = client_user
         serializer = ClientUserSerializer(queryset, many=True)
         return Response(serializer.data[0])
+
+    @detail_route(methods=['get'])
+    def token(self, request, **kwargs):
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         application=application)
+        else:
+            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
+                                         owner=request.user)
+        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
+        client_user = ClientUser.objects.filter(client=client, email=kwargs['email']).first().user
+        if not client_user:
+            return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(client_user)
+        token = jwt_encode_handler(payload)
+
+        return Response(token, status=status.HTTP_200_OK)
 
 
 class UsersViewSet(ModelViewSet):
