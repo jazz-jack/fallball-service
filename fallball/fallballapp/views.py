@@ -217,7 +217,7 @@ class ClientUserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     lookup_field = 'email'
     # Redefine regex in order to get user email as id
-    lookup_value_regex = '[^@]+@[^@]+\.[^@][^/]+'
+    lookup_value_regex = '[^@]+@[^@]+\.[^@/]+'
 
     def create(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
