@@ -25,6 +25,7 @@ def is_superuser(f):
         if request.user.is_superuser:
             return f(*args)
         return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+
     return wrapper
 
 
@@ -34,4 +35,5 @@ def is_application(f):
         if not application:
             return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
         return f(application=application, *args, **kwargs)
+
     return wrapper
