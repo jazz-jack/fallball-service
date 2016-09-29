@@ -140,9 +140,9 @@ class BaseTestCase(TestCase):
                             json.dumps({'id': 'tricky_chicken_2'}),
                             content_type='application/json')
 
-        self.assertTrue(ClientUser.objects.filter(email=first_app_user.email).count() == 2)
-        self.assertTrue(Client.objects.filter(name=first_app_client.name).count() == 2)
-        self.assertTrue(Reseller.objects.filter(name=first_app_reseller.name).count() == 2)
+        self.assertEqual(ClientUser.objects.filter(email=first_app_user.email).count(), 2)
+        self.assertEqual(Client.objects.filter(name=first_app_client.name).count(), 2)
+        self.assertEqual(Reseller.objects.filter(name=first_app_reseller.name).count(), 2)
 
     def test_usage_limit(self):
         app = Application.objects.all().first()
@@ -179,8 +179,8 @@ class BaseTestCase(TestCase):
                                          'not_found_client/'.format(reseller.name),
                                          content_type='application/json').status_code
 
-        self.assertTrue(reseller_code == 404)
-        self.assertTrue(client_code == 404)
+        self.assertEqual(reseller_code, 404)
+        self.assertEqual(client_code, 404)
 
     def test_jwt_token(self):
         reseller = Reseller.objects.all().first()
@@ -195,7 +195,7 @@ class BaseTestCase(TestCase):
                                                                                        client_name,
                                                                                        email),
                                   content_type='application/json').status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
     def test_app_403_creation(self):
         reseller = Reseller.objects.all().first()
@@ -204,7 +204,7 @@ class BaseTestCase(TestCase):
         code = client_request.post('/v1/applications/',
                                    json.dumps({'id': 'tricky_chicken_2'}),
                                    content_type='application/json').status_code
-        self.assertTrue(code == 403)
+        self.assertEqual(code, 403)
 
     def test_client_retrieve(self):
         admin = ClientUser.objects.filter(admin=True).first()
@@ -214,26 +214,26 @@ class BaseTestCase(TestCase):
         app_request = _get_client(admin.client.reseller.application.owner)
         code = app_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
                                                                      client_name)).status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
         reseller_request = _get_client(admin.client.reseller.owner)
 
         code = reseller_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
                                                                           client_name)).status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
         user_request = _get_client(admin.user)
 
         code = user_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
                                                                       client_name)).status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
         user_request = _get_client(not_admin.user)
 
         code = user_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
                                                                       client_name)).status_code
-        self.assertTrue(code == 404)
+        self.assertEqual(code, 404)
 
     def test_user_mgmt_under_admin(self):
         admin = ClientUser.objects.filter(admin=True).first()
@@ -244,18 +244,18 @@ class BaseTestCase(TestCase):
         # List
         code = request.get('/v1/resellers/{}/clients/{}/users/'.format(reseller_name,
                                                                        client_name)).status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
         # Retrieve
         user = ClientUser.objects.filter(admin=False, client=admin.client).first()
         url = '/v1/resellers/{}/clients/{}/users/{}/'
         code = request.get(url.format(reseller_name, client_name, user.email)).status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
         # Get user token
         url = '/v1/resellers/{}/clients/{}/users/{}/token/'
         code = request.get(url.format(reseller_name, client_name, user.email)).status_code
-        self.assertTrue(code == 200)
+        self.assertEqual(code, 200)
 
         # Create
         code = request.post('/v1/resellers/{}/clients/{}/users/'.format(reseller_name,
@@ -269,4 +269,4 @@ class BaseTestCase(TestCase):
         # Delete
         url = '/v1/resellers/{}/clients/{}/users/{}/'
         code = request.delete(url.format(reseller_name, client_name, user.email)).status_code
-        self.assertTrue(code == 204)
+        self.assertEqual(code, 204)
