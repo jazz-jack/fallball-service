@@ -196,3 +196,77 @@ class BaseTestCase(TestCase):
                                                                                        email),
                                   content_type='application/json').status_code
         self.assertTrue(code == 200)
+
+    def test_app_403_creation(self):
+        reseller = Reseller.objects.all().first()
+        client_request = _get_client(reseller.owner)
+
+        code = client_request.post('/v1/applications/',
+                                   json.dumps({'id': 'tricky_chicken_2'}),
+                                   content_type='application/json').status_code
+        self.assertTrue(code == 403)
+
+    def test_client_retrieve(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        client_name = admin.client.name
+        reseller_name = admin.client.reseller.name
+
+        app_request = _get_client(admin.client.reseller.application.owner)
+        code = app_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
+                                                                     client_name)).status_code
+        self.assertTrue(code == 200)
+
+        reseller_request = _get_client(admin.client.reseller.owner)
+
+        code = reseller_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
+                                                                          client_name)).status_code
+        self.assertTrue(code == 200)
+
+        user_request = _get_client(admin.user)
+
+        code = user_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
+                                                                      client_name)).status_code
+        self.assertTrue(code == 200)
+
+        not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
+        user_request = _get_client(not_admin.user)
+
+        code = user_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
+                                                                      client_name)).status_code
+        self.assertTrue(code == 404)
+
+    def test_user_mgmt_under_admin(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        client_name = admin.client.name
+        reseller_name = admin.client.reseller.name
+        request = _get_client(admin.user)
+
+        # List
+        code = request.get('/v1/resellers/{}/clients/{}/users/'.format(reseller_name,
+                                                                       client_name)).status_code
+        self.assertTrue(code == 200)
+
+        # Retrieve
+        user = ClientUser.objects.filter(admin=False, client=admin.client).first()
+        url = '/v1/resellers/{}/clients/{}/users/{}/'
+        code = request.get(url.format(reseller_name, client_name, user.email)).status_code
+        self.assertTrue(code == 200)
+
+        # Get user token
+        url = '/v1/resellers/{}/clients/{}/users/{}/token/'
+        code = request.get(url.format(reseller_name, client_name, user.email)).status_code
+        self.assertTrue(code == 200)
+
+        # Create
+        code = request.post('/v1/resellers/{}/clients/{}/users/'.format(reseller_name,
+                                                                        client_name),
+                            json.dumps({'email': 'newuser@newclient.tld',
+                                        'storage': {'limit': 3},
+                                        'password': 'password'}),
+                            content_type='application/json').status_code
+        self.assertTrue(code == 201)
+
+        # Delete
+        url = '/v1/resellers/{}/clients/{}/users/{}/'
+        code = request.delete(url.format(reseller_name, client_name, user.email)).status_code
+        self.assertTrue(code == 204)
