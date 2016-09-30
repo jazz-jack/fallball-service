@@ -27,6 +27,10 @@ class ApplicationViewSet(ModelViewSet):
 
     @is_superuser
     def list(self, request, *args, **kwargs):
+        from django.core.urlresolvers import reverse
+        import ipdb
+        ipdb.set_trace()
+        reverse('app-details', kwargs={"id": "and_one_more_app12"})
         return ModelViewSet.list(self, request, *args, **kwargs)
 
     @is_superuser

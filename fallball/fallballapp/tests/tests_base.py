@@ -3,6 +3,7 @@ import random
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -32,7 +33,8 @@ class BaseTestCase(TestCase):
         client_request = _get_client(admin.id)
 
         # create_application
-        client_request.post('/v1/applications/',
+        url = reverse('v1:applications-list')
+        client_request.post(url,
                             json.dumps({'id': 'tricky_chicken'}),
                             content_type='application/json')
 
@@ -45,15 +47,16 @@ class BaseTestCase(TestCase):
 
     def test_creation_under_reseller(self):
         reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_client(reseller.owner)
-        client_request.post('/v1/resellers/{}/clients/'.format(reseller.name),
-                            json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
+        client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
                             content_type='application/json')
 
-        client_request.post('/v1/resellers/{}/clients/new_client/users/'.format(reseller.name),
-                            json.dumps({'email': 'newuser@newclient.tld',
-                                        'storage': {'limit': 30},
-                                        'password': 'password'}),
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': 'new_client'})
+        client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
+                                             'storage': {'limit': 30},
+                                             'password': 'password'}),
                             content_type='application/json')
 
         self.assertTrue(Client.objects.filter(name='new_client'))
@@ -64,15 +67,15 @@ class BaseTestCase(TestCase):
         client_request = _get_client(app.owner.id)
 
         reseller = Reseller.objects.filter(application=app).first()
-
-        client_request.post('/v1/resellers/{}/clients/'.format(reseller.name),
-                            json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
                             content_type='application/json')
 
-        client_request.post('/v1/resellers/{}/clients/new_client/users/'.format(reseller.name),
-                            json.dumps({'email': 'newuser@newclient.tld',
-                                        'storage': {'limit': 30},
-                                        'password': 'password'}),
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': 'new_client'})
+        client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
+                                             'storage': {'limit': 30},
+                                             'password': 'password'}),
                             content_type='application/json')
 
         self.assertTrue(Client.objects.filter(name='new_client'))
@@ -84,14 +87,13 @@ class BaseTestCase(TestCase):
 
         client = Client.objects.filter().first()
         reseller_name = client.reseller.name
-
-        client_request.delete('/v1/resellers/{}/clients/{}/'.format(reseller_name,
-                                                                    client.name),
-                              content_type='application/json')
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller_name,
+                                                   'name': client.name})
+        client_request.delete(url, content_type='application/json')
         self.assertFalse(Client.objects.filter(name=client.name))
 
-        client_request.delete('/v1/resellers/{}/'.format(reseller_name),
-                              content_type='application/json')
+        url = reverse('v1:resellers-detail', kwargs={'name': reseller_name})
+        client_request.delete(url, content_type='application/json')
         self.assertFalse(Reseller.objects.filter(name=reseller_name))
 
     def test_deleting_by_reseller(self):
@@ -100,16 +102,15 @@ class BaseTestCase(TestCase):
 
         client_user = ClientUser.objects.filter().first()
         client_name = client_user.client.name
-
-        client_request.delete('/v1/resellers/{}/clients/{}/users/{}/'.format(reseller.name,
-                                                                             client_name,
-                                                                             client_user.email),
-                              content_type='application/json')
+        url = reverse('v1:users-detail', kwargs={'reseller_name': reseller.name,
+                                                 'client_name': client_name,
+                                                 'email': client_user.email})
+        client_request.delete(url, content_type='application/json')
         self.assertFalse(ClientUser.objects.filter(email=client_user.email))
 
-        client_request.delete('/v1/resellers/{}/clients/{}/'.format(reseller.name,
-                                                                    client_name),
-                              content_type='application/json')
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller.name,
+                                                   'name': client_name})
+        client_request.delete(url, content_type='application/json')
         self.assertFalse(Client.objects.filter(name=client_name))
 
     def test_duplicated_users(self):
@@ -120,11 +121,10 @@ class BaseTestCase(TestCase):
         email = client_user.email
         client_name = client_user.client.name
         reseller_name = client_user.client.reseller.name
-
-        request = client_request.post('/v1/resellers/{}/clients/{}/users/{}/'.format(reseller_name,
-                                                                                     client_name,
-                                                                                     email),
-                                      content_type='application/json')
+        url = reverse('v1:users-detail', kwargs={'reseller_name': reseller_name,
+                                                 'client_name': client_name,
+                                                 'email': email})
+        request = client_request.post(url, content_type='application/json')
         self.assertFalse(request.status_code == 200)
 
     def test_two_applications(self):
@@ -136,8 +136,8 @@ class BaseTestCase(TestCase):
         first_app_reseller = first_app_client.reseller
 
         # create second application
-        client_request.post('/v1/applications/',
-                            json.dumps({'id': 'tricky_chicken_2'}),
+        url = reverse('v1:applications-list')
+        client_request.post(url, json.dumps({'id': 'tricky_chicken_2'}),
                             content_type='application/json')
 
         self.assertEqual(ClientUser.objects.filter(email=first_app_user.email).count(), 2)
@@ -152,15 +152,17 @@ class BaseTestCase(TestCase):
 
         client_limit = random.randint(0, reseller.limit)
 
-        client_request.post('/v1/resellers/{}/clients/'.format(reseller.name),
-                            json.dumps({'name': 'new_client', 'storage': {'limit': client_limit}}),
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request.post(url, json.dumps({'name': 'new_client',
+                                             'storage': {'limit': client_limit}}),
                             content_type='application/json')
 
         self.assertTrue(Client.objects.filter(name='new_client'))
 
         client_limit = random.randint(reseller.limit, reseller.limit + 100)
 
-        client_request.post('/v1/resellers/{}/clients/'.format(reseller.name),
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request.post(url,
                             json.dumps({'name': 'new_client2', 'storage': {'limit': client_limit}}),
                             content_type='application/json')
 
@@ -170,14 +172,13 @@ class BaseTestCase(TestCase):
         app = Application.objects.all().first()
         client_request = _get_client(app.owner.id)
 
-        reseller_code = client_request.get('/v1/resellers/not_found_reseller/',
-                                           content_type='application/json').status_code
+        url = reverse('v1:resellers-detail', kwargs={'name': 'not_found_reseller'})
+        reseller_code = client_request.get(url, content_type='application/json').status_code
 
         reseller = Reseller.objects.all().first()
-
-        client_code = client_request.get('/v1/resellers/{}/clients/'
-                                         'not_found_client/'.format(reseller.name),
-                                         content_type='application/json').status_code
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller.name,
+                                                   'name': 'not_found_client'})
+        client_code = client_request.get(url, content_type='application/json').status_code
 
         self.assertEqual(reseller_code, 404)
         self.assertEqual(client_code, 404)
@@ -191,9 +192,10 @@ class BaseTestCase(TestCase):
         client_name = client_user.client.name
         email = client_user.email
 
-        code = client_request.get('/v1/resellers/{}/clients/{}/users/{}/token/'.format(res_name,
-                                                                                       client_name,
-                                                                                       email),
+        url = reverse('v1:users-detail', kwargs={'reseller_name': res_name,
+                                                 'client_name': client_name,
+                                                 'email': email})
+        code = client_request.get('{}{}'.format(url, 'token/'),
                                   content_type='application/json').status_code
         self.assertEqual(code, 200)
 
@@ -201,8 +203,8 @@ class BaseTestCase(TestCase):
         reseller = Reseller.objects.all().first()
         client_request = _get_client(reseller.owner)
 
-        code = client_request.post('/v1/applications/',
-                                   json.dumps({'id': 'tricky_chicken_2'}),
+        url = reverse('v1:applications-list')
+        code = client_request.post(url, json.dumps({'id': 'tricky_chicken_2'}),
                                    content_type='application/json').status_code
         self.assertEqual(code, 403)
 
@@ -212,27 +214,25 @@ class BaseTestCase(TestCase):
         reseller_name = admin.client.reseller.name
 
         app_request = _get_client(admin.client.reseller.application.owner)
-        code = app_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
-                                                                     client_name)).status_code
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller_name,
+                                                   'name': client_name})
+        code = app_request.get(url).status_code
         self.assertEqual(code, 200)
 
         reseller_request = _get_client(admin.client.reseller.owner)
 
-        code = reseller_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
-                                                                          client_name)).status_code
+        code = reseller_request.get(url).status_code
         self.assertEqual(code, 200)
 
         user_request = _get_client(admin.user)
 
-        code = user_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
-                                                                      client_name)).status_code
+        code = user_request.get(url).status_code
         self.assertEqual(code, 200)
 
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
         user_request = _get_client(not_admin.user)
 
-        code = user_request.get('/v1/resellers/{}/clients/{}/'.format(reseller_name,
-                                                                      client_name)).status_code
+        code = user_request.get(url).status_code
         self.assertEqual(code, 404)
 
     def test_user_mgmt_under_admin(self):
@@ -242,24 +242,25 @@ class BaseTestCase(TestCase):
         request = _get_client(admin.user)
 
         # List
-        code = request.get('/v1/resellers/{}/clients/{}/users/'.format(reseller_name,
-                                                                       client_name)).status_code
+        list_url = reverse('v1:users-list', kwargs={'reseller_name': reseller_name,
+                                                    'client_name': client_name})
+        code = request.get(list_url).status_code
         self.assertEqual(code, 200)
 
         # Retrieve
         user = ClientUser.objects.filter(admin=False, client=admin.client).first()
-        url = '/v1/resellers/{}/clients/{}/users/{}/'
-        code = request.get(url.format(reseller_name, client_name, user.email)).status_code
+        url = reverse('v1:users-detail', kwargs={'reseller_name': reseller_name,
+                                                 'client_name': client_name,
+                                                 'email': user.email})
+        code = request.get(url).status_code
         self.assertEqual(code, 200)
 
         # Get user token
-        url = '/v1/resellers/{}/clients/{}/users/{}/token/'
-        code = request.get(url.format(reseller_name, client_name, user.email)).status_code
+        code = request.get('{}{}'.format(url, 'token/')).status_code
         self.assertEqual(code, 200)
 
         # Create
-        code = request.post('/v1/resellers/{}/clients/{}/users/'.format(reseller_name,
-                                                                        client_name),
+        code = request.post(list_url,
                             json.dumps({'email': 'newuser@newclient.tld',
                                         'storage': {'limit': 3},
                                         'password': 'password'}),
@@ -267,6 +268,5 @@ class BaseTestCase(TestCase):
         self.assertTrue(code == 201)
 
         # Delete
-        url = '/v1/resellers/{}/clients/{}/users/{}/'
-        code = request.delete(url.format(reseller_name, client_name, user.email)).status_code
+        code = request.delete(url).status_code
         self.assertEqual(code, 204)
