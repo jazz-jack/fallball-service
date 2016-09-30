@@ -5,13 +5,14 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_jwt.settings import api_settings
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer)
-from fallballapp.utils import (dump_exits, get_all_reseller_clients,
-                               get_all_resellers, get_app_username, get_object_or_403, repair)
+from fallballapp.utils import (get_app_username, get_object_or_403, is_superuser, is_application)
 
 
 class ApplicationViewSet(ModelViewSet):
@@ -20,25 +21,21 @@ class ApplicationViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
     queryset = Application.objects.all()
 
+    @is_superuser
     def create(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            return ModelViewSet.create(self, request, *args, **kwargs)
-        return Response("Only superuser can create application", status=status.HTTP_403_FORBIDDEN)
+        return ModelViewSet.create(self, request, *args, **kwargs)
 
+    @is_superuser
     def list(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            return ModelViewSet.list(self, request, *args, **kwargs)
-        return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+        return ModelViewSet.list(self, request, *args, **kwargs)
 
+    @is_superuser
     def retrieve(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            return ModelViewSet.retrieve(self, request, *args, **kwargs)
-        return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+        return ModelViewSet.retrieve(self, request, *args, **kwargs)
 
+    @is_superuser
     def destroy(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            return ModelViewSet.destroy(self, request, *args, **kwargs)
-        return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+        return ModelViewSet.destroy(self, request, *args, **kwargs)
 
 
 class ResellerViewSet(ModelViewSet):
@@ -48,42 +45,34 @@ class ResellerViewSet(ModelViewSet):
     queryset = Reseller.objects.all()
     lookup_field = 'name'
 
+    @is_application
     def create(self, request, *args, **kwargs):
-        application = get_object_or_403(Application, owner=request.user)
-        if application:
-            request.data['application'] = application
-            return ModelViewSet.create(self, request, *args, **kwargs)
-        return Response("Reseller should be created with application token",
-                        status=status.HTTP_403_FORBIDDEN)
+        request.data['application'] = kwargs['application']
+        return ModelViewSet.create(self, request, *args, **kwargs)
 
+    @is_application
     def destroy(self, request, *args, **kwargs):
-        application = get_object_or_403(Application, owner=request.user)
-        if not application:
-            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
-        Reseller.objects.filter(name=kwargs['name'], application=application).delete()
-        username = get_app_username(kwargs['name'], application.id)
+        Reseller.objects.filter(name=kwargs['name'],
+                                application=kwargs['application']).delete()
+        username = get_app_username(kwargs['name'], kwargs['application'])
         User.objects.filter(username=username).delete()
         return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
 
+    @is_application
     def list(self, request, *args, **kwargs):
-        """
-        Method is overwritten in order to implement superuser check
-        """
-        application = get_object_or_403(Application, owner=request.user)
-        if not application:
-            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
-        queryset = Reseller.objects.filter(application=application)
+        queryset = Reseller.objects.filter(application=kwargs['application'])
         serializer = ResellerSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        application = get_object_or_403(Application, owner=request.user)
-        reseller = get_object_or_404(Reseller, application=application, name=kwargs['name'])
-
-        if not application:
-            return Response("Authorization failed",
-                            status=status.HTTP_403_FORBIDDEN)
-        queryset = [reseller, ]
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            reseller = get_object_or_404(Reseller, name=kwargs['name'],
+                                         application=application)
+        else:
+            reseller = get_object_or_404(Reseller, name=kwargs['name'],
+                                         owner=request.user)
+        queryset = (reseller,)
         serializer = ResellerSerializer(queryset, many=True)
         return Response(serializer.data[0])
 
@@ -92,38 +81,14 @@ class ResellerViewSet(ModelViewSet):
         """
         Repair particular reseller
         """
-        application = get_object_or_403(Application, owner=request.user)
-
-        if application:
-            reseller = get_object_or_404(Reseller, pk=kwargs['pk'])
-        else:
-            reseller = get_object_or_403(Reseller, pk=kwargs['pk'], owner=request.user)
-
-        # Check if reseller exists in database
-        if dump_exits(reseller.pk):
-            repair(Reseller, reseller.pk)
-            return Response("All clients has been repaired", status=status.HTTP_200_OK)
-        return Response("This reseller cannot be repaired",
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @list_route(methods=['get'])
     def reset_all(self, request, *args, **kwargs):
         """
-        Repair particular reseller
+        Repair all resellers
         """
-        application = get_object_or_403(Application, owner=request.user)
-
-        if not application:
-            return Response("Only superuser can repair all resellers",
-                            status=status.HTTP_403_FORBIDDEN)
-        # Delete all existed resellers prior to reparing:
-        Reseller.objects.all().delete()
-
-        # Get list of available resellers from dump and repair one by one
-        resellers = get_all_resellers()
-        for reseller in resellers:
-            repair(Reseller, reseller['pk'])
-        return Response("All resellers has been repaired", status=status.HTTP_200_OK)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ClientViewSet(ModelViewSet):
@@ -182,15 +147,23 @@ class ClientViewSet(ModelViewSet):
         """
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         application=application)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
         else:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         owner=request.user)
-        client = Client.objects.filter(reseller=reseller, name=kwargs['name'])
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                if not admin.client.name == kwargs['name']:
+                    return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+                reseller = admin.client.reseller
+
+        client = Client.objects.filter(reseller=reseller, name=kwargs['name']).first()
         if not client:
             return Response("Client does not exist", status=status.HTTP_404_NOT_FOUND)
-        queryset = client
+        queryset = (client, )
         serializer = ClientSerializer(queryset, many=True)
         return Response(serializer.data[0])
 
@@ -213,69 +186,40 @@ class ClientViewSet(ModelViewSet):
         """
         Recreate client to initial state
         """
-        if request.user.is_superuser:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'])
-        else:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'], owner=request.user)
-
-        # Check that client belongs to particular reseller
-        get_object_or_404(Client, reseller=reseller, pk=kwargs['pk'])
-        try:
-            repair(Client, kwargs['pk'])
-        except:
-            return Response("This client cannot be repaired",
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response("Client has been repaired", status=status.HTTP_200_OK)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @list_route(methods=['get'])
     def reset_all(self, request, *args, **kwargs):
         """
         Recreate all reseller clients to initial state
         """
-        if request.user.is_superuser:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'])
-        else:
-            reseller = get_object_or_403(Reseller, pk=kwargs['reseller_pk'], owner=request.user)
-
-        clients = get_all_reseller_clients(kwargs['reseller_pk'])
-        if not clients:
-            return Response("There are no clients to repair",
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # Delete all reseller clients
-        Client.objects.filter(reseller=reseller).delete()
-        for client in clients:
-            repair(Client, client['pk'])
-        return Response("All clients has been repaired", status=status.HTTP_200_OK)
+        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ClientUserViewSet(ModelViewSet):
-    """
-    Create new client user
-    """
     queryset = ClientUser.objects.all().order_by('-id')
     serializer_class = ClientUserSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     lookup_field = 'email'
     # Redefine regex in order to get user email as id
-    lookup_value_regex = '[^@]+@[^@]+\.[^@]+'
+    lookup_value_regex = '[^@]+@[^@]+\.[^@/]+'
 
     def create(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         application=application)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
         else:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         owner=request.user)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                reseller = admin.client.reseller
 
-        # get client to provide it for user creation
-        client = Client.objects.filter(reseller=reseller,
-                                       name=kwargs['client_name']).first()
-        if not client:
-            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
-
+        client = get_object_or_404(Client, name=kwargs['client_name'], reseller=reseller)
         # Check if client has free space for new user
         free_space = client.limit - client.get_usage()
         if free_space >= request.data['storage']['limit']:
@@ -291,29 +235,36 @@ class ClientUserViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         application=application)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
         else:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         owner=request.user)
-
-        client_user = get_object_or_404(ClientUser, email=kwargs['email'])
-        if client_user.client.reseller == reseller:
-            client_user.delete()
-            User.objects.filter(username='{}.{}'.format(reseller.application.id,
-                                                        kwargs['email'])).delete()
-            return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                reseller = admin.client.reseller
+        client = get_object_or_404(Client, name=kwargs['client_name'], reseller=reseller)
+        client_user = get_object_or_404(ClientUser, email=kwargs['email'], client=client)
+        client_user.delete()
+        User.objects.filter(username='{}.{}'.format(reseller.application.id,
+                                                    kwargs['email'])).delete()
+        return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         application=application)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
         else:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         owner=request.user)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                reseller = admin.client.reseller
 
         client = get_object_or_404(Client, reseller=reseller, name=kwargs['client_name'])
         queryset = ClientUser.objects.filter(client=client)
@@ -323,19 +274,55 @@ class ClientUserViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         application = Application.objects.filter(owner=request.user).first()
         if application:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         application=application)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
         else:
-            reseller = get_object_or_403(Reseller, name=kwargs['reseller_name'],
-                                         owner=request.user)
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                if not admin.client.name == kwargs['client_name']:
+                    return Response("Authorization failed", status=HTTP_403_FORBIDDEN)
+                reseller = admin.client.reseller
 
-        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
-        client_user = ClientUser.objects.filter(client=client, email=kwargs['email'])
-        if not client_user:
+        if not reseller:
+            return Response("Such reseller is not found", status=status.HTTP_404_NOT_FOUND)
+
+        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name']).first()
+        queryset = ClientUser.objects.filter(client=client, email=kwargs['email'])
+        if not queryset:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
-        queryset = client_user
         serializer = ClientUserSerializer(queryset, many=True)
         return Response(serializer.data[0])
+
+    @detail_route(methods=['get'])
+    def token(self, request, **kwargs):
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
+        else:
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                reseller = admin.client.reseller
+
+        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
+        client_user = ClientUser.objects.filter(client=client, email=kwargs['email']).first().user
+        if not client_user:
+            return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(client_user)
+        token = jwt_encode_handler(payload)
+
+        return Response(token, status=status.HTTP_200_OK)
 
 
 class UsersViewSet(ModelViewSet):
