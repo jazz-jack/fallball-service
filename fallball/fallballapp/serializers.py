@@ -133,3 +133,16 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
                                         password=validated_data['password'])
         return ClientUser.objects.create(usage=usage, user=user,
                                          client=self.initial_data['client'], **validated_data)
+
+
+class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
+    storage = StorageClientUserSerializer(source='*')
+    admin = rest_serializers.BooleanField()
+    company = rest_serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClientUser
+        fields = ('email', 'storage', 'admin', 'company')
+
+    def get_company(self, obj):
+        return obj.client.name

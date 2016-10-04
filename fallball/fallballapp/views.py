@@ -9,14 +9,14 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_jwt.settings import api_settings
 
-from fallballapp.mixins import RequestLogViewsetMixin
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
-                                     ClientUserSerializer, ResellerSerializer)
+                                     ClientUserSerializer, ResellerSerializer,
+                                     UserAuthorizationSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, is_superuser, is_application)
 
 
-class ApplicationViewSet(RequestLogViewsetMixin, ModelViewSet):
+class ApplicationViewSet(ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ApplicationSerializer
@@ -39,7 +39,7 @@ class ApplicationViewSet(RequestLogViewsetMixin, ModelViewSet):
         return ModelViewSet.destroy(self, request, *args, **kwargs)
 
 
-class ResellerViewSet(RequestLogViewsetMixin, ModelViewSet):
+class ResellerViewSet(ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ResellerSerializer
@@ -92,7 +92,7 @@ class ResellerViewSet(RequestLogViewsetMixin, ModelViewSet):
         return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class ClientViewSet(RequestLogViewsetMixin, ModelViewSet):
+class ClientViewSet(ModelViewSet):
     """
     ViewSet which manages clients
     """
@@ -197,7 +197,7 @@ class ClientViewSet(RequestLogViewsetMixin, ModelViewSet):
         return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class ClientUserViewSet(RequestLogViewsetMixin, ModelViewSet):
+class ClientUserViewSet(ModelViewSet):
     queryset = ClientUser.objects.all().order_by('-id')
     serializer_class = ClientUserSerializer
     authentication_classes = (TokenAuthentication,)
@@ -326,10 +326,10 @@ class ClientUserViewSet(RequestLogViewsetMixin, ModelViewSet):
         return Response(token, status=status.HTTP_200_OK)
 
 
-class UsersViewSet(RequestLogViewsetMixin, ModelViewSet):
+class UsersViewSet(ModelViewSet):
     queryset = User.objects.all()
 
     def list(self, request, *args, **kwargs):
         queryset = ClientUser.objects.filter(user_id=request.user.id).first()
-        serializer = ClientUserSerializer(queryset)
+        serializer = UserAuthorizationSerializer(queryset)
         return Response(serializer.data)
