@@ -8,11 +8,8 @@ class RequestLogMiddleware(object):
 
     def process_response(self, request, response):
 
-        log_data = {
-            'log': "I am logging it!"
-        }
-
-        logger = logging.getLogger(__name__)
-        logger.info('I am logging!!!')
+        if response.content:
+            logger = logging.getLogger(__name__)
+            logger.info({'response_body': response.content})
 
         return response
