@@ -39,7 +39,7 @@ class ApplicationViewSet(RequestLogViewsetMixin, ModelViewSet):
         return ModelViewSet.destroy(self, request, *args, **kwargs)
 
 
-class ResellerViewSet(ModelViewSet):
+class ResellerViewSet(RequestLogViewsetMixin, ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ResellerSerializer
@@ -92,7 +92,7 @@ class ResellerViewSet(ModelViewSet):
         return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class ClientViewSet(ModelViewSet):
+class ClientViewSet(RequestLogViewsetMixin, ModelViewSet):
     """
     ViewSet which manages clients
     """
@@ -197,7 +197,7 @@ class ClientViewSet(ModelViewSet):
         return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class ClientUserViewSet(ModelViewSet):
+class ClientUserViewSet(RequestLogViewsetMixin, ModelViewSet):
     queryset = ClientUser.objects.all().order_by('-id')
     serializer_class = ClientUserSerializer
     authentication_classes = (TokenAuthentication,)
@@ -326,7 +326,7 @@ class ClientUserViewSet(ModelViewSet):
         return Response(token, status=status.HTTP_200_OK)
 
 
-class UsersViewSet(ModelViewSet):
+class UsersViewSet(RequestLogViewsetMixin, ModelViewSet):
     queryset = User.objects.all()
 
     def list(self, request, *args, **kwargs):
