@@ -9,13 +9,14 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_jwt.settings import api_settings
 
+from fallballapp.mixins import RequestLogViewsetMixin
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, is_superuser, is_application)
 
 
-class ApplicationViewSet(ModelViewSet):
+class ApplicationViewSet(RequestLogViewsetMixin, ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ApplicationSerializer
