@@ -11,7 +11,8 @@ from rest_framework_jwt.settings import api_settings
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
-                                     ClientUserSerializer, ResellerSerializer)
+                                     ClientUserSerializer, ResellerSerializer,
+                                     UserAuthorizationSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, is_superuser, is_application)
 
 
@@ -330,5 +331,5 @@ class UsersViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = ClientUser.objects.filter(user_id=request.user.id).first()
-        serializer = ClientUserSerializer(queryset)
+        serializer = UserAuthorizationSerializer(queryset)
         return Response(serializer.data)

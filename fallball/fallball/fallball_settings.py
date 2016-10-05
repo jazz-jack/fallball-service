@@ -37,6 +37,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'fallballapp.middleware.RequestLogMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
