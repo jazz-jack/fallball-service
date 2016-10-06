@@ -19,11 +19,13 @@ def get_object_or_403(*args, **kwargs):
 def get_app_username(app_id, username):
     return '{}.{}'.format(app_id, username)
 
+
 def get_jwt_token(user):
     jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
     jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
     payload = jwt_payload_handler(user)
     return jwt_encode_handler(payload)
+
 
 def is_superuser(f):
     def wrapper(*args, **kwargs):

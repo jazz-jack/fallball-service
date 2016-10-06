@@ -156,4 +156,3 @@ class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
 
     def get_token(self, obj):
         return get_jwt_token(obj.user)
-
