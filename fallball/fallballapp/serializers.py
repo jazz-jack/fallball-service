@@ -81,6 +81,12 @@ class ResellerSerializer(AuthorizationSerializer):
         return obj.get_clients_amount()
 
 
+class ResellerNameSerializer(rest_serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Reseller
+        fields = ('name', )
+
+
 class StorageClientSerializer(rest_serializers.HyperlinkedModelSerializer):
     usage = rest_serializers.SerializerMethodField()
 

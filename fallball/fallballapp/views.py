@@ -12,7 +12,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
-                                     UserAuthorizationSerializer)
+                                     ResellerNameSerializer, UserAuthorizationSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token, 
                                is_superuser, is_application)
 
@@ -71,7 +71,10 @@ class ResellerViewSet(ModelViewSet):
                 if not admin:
                     return Response("Resellers do not exist for such account",
                                     status=HTTP_404_NOT_FOUND)
-                resellers = [admin.client.reseller, ]
+
+                queryset = [admin.client.reseller, ]
+                serializer = ResellerNameSerializer(queryset, many=True)
+                return Response(serializer.data)
 
         queryset = resellers
         serializer = ResellerSerializer(queryset, many=True)
