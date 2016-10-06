@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
@@ -40,7 +41,7 @@ class ApplicationViewSet(ModelViewSet):
 
 
 class ResellerViewSet(ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     serializer_class = ResellerSerializer
     queryset = Reseller.objects.all()
@@ -109,7 +110,7 @@ class ClientViewSet(ModelViewSet):
     """
     queryset = Client.objects.all().order_by('-id')
     serializer_class = ClientSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     lookup_field = 'name'
 
@@ -211,7 +212,7 @@ class ClientViewSet(ModelViewSet):
 class ClientUserViewSet(ModelViewSet):
     queryset = ClientUser.objects.all().order_by('-id')
     serializer_class = ClientUserSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     lookup_field = 'email'
     # Redefine regex in order to get user email as id
