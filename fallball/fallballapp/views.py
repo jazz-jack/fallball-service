@@ -13,7 +13,7 @@ from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
                                      ResellerNameSerializer, UserAuthorizationSerializer)
-from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token, 
+from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token,
                                is_superuser, is_application)
 
 
