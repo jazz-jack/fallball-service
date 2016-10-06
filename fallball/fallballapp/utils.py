@@ -2,6 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework_jwt.settings import api_settings
 from rest_framework.response import Response
 
 from fallballapp.models import Application
@@ -18,6 +19,11 @@ def get_object_or_403(*args, **kwargs):
 def get_app_username(app_id, username):
     return '{}.{}'.format(app_id, username)
 
+def get_jwt_token(user):
+    jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+    jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+    payload = jwt_payload_handler(user)
+    return jwt_encode_handler(payload)
 
 def is_superuser(f):
     def wrapper(*args, **kwargs):
@@ -25,7 +31,6 @@ def is_superuser(f):
         if request.user.is_superuser:
             return f(*args)
         return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
-
     return wrapper
 
 
@@ -35,5 +40,4 @@ def is_application(f):
         if not application:
             return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
         return f(application=application, *args, **kwargs)
-
     return wrapper

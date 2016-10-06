@@ -7,13 +7,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_jwt.settings import api_settings
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
                                      UserAuthorizationSerializer)
-from fallballapp.utils import (get_app_username, get_object_or_403, is_superuser, is_application)
+from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token, 
+                               is_superuser, is_application)
 
 
 class ApplicationViewSet(ModelViewSet):
@@ -318,11 +318,7 @@ class ClientUserViewSet(ModelViewSet):
         if not client_user:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
 
-        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-        payload = jwt_payload_handler(client_user)
-        token = jwt_encode_handler(payload)
-
+        token = get_jwt_token(client_user)
         return Response(token, status=status.HTTP_200_OK)
 
 

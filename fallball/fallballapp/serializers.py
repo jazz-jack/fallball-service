@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
-from fallballapp.utils import get_app_username
+from fallballapp.utils import get_app_username, get_jwt_token
 
 
 class AuthorizationSerializer(rest_serializers.HyperlinkedModelSerializer):
@@ -139,6 +139,7 @@ class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
     storage = StorageClientUserSerializer(source='*')
     admin = rest_serializers.BooleanField()
     company = rest_serializers.SerializerMethodField()
+    token = rest_serializers.SerializerMethodField()
 
     class Meta:
         model = ClientUser
@@ -146,3 +147,7 @@ class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
 
     def get_company(self, obj):
         return obj.client.name
+
+    def get_token(self, obj):
+        return get_jwt_token(obj.user)
+
