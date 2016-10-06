@@ -65,7 +65,7 @@ class ResellerViewSet(ModelViewSet):
         if application:
             resellers = Reseller.objects.filter(application=application)
         else:
-            resellers = Reseller.objects.filter(name=kwargs['name'], owner=request.user)
+            resellers = Reseller.objects.filter(owner=request.user)
             if not resellers:
                 admin = ClientUser.objects.filter(user=request.user, admin=True).first()
                 if not admin:
