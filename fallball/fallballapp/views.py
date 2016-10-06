@@ -59,9 +59,20 @@ class ResellerViewSet(ModelViewSet):
         User.objects.filter(username=username).delete()
         return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
 
-    @is_application
     def list(self, request, *args, **kwargs):
-        queryset = Reseller.objects.filter(application=kwargs['application'])
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            resellers = Reseller.objects.filter(application=application)
+        else:
+            resellers = Reseller.objects.filter(name=kwargs['name'], owner=request.user)
+            if not resellers:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Resellers do not exist for such account",
+                                    status=HTTP_404_NOT_FOUND)
+                resellers = [admin.client.reseller, ]
+
+        queryset = resellers
         serializer = ResellerSerializer(queryset, many=True)
         return Response(serializer.data)
 
