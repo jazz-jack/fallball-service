@@ -14,7 +14,6 @@ install:
 services:
   - mysql
 script:
-  - mv fallball/fallball/fallball_settings.py fallball/fallball/settings.py
   - python setup.py flake8
   - coverage run --source=fallball setup.py test
 notifications:
