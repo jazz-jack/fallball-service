@@ -9,7 +9,13 @@ SECRET_KEY = 'key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+SERVICE_HOST = 'localhost'
+SPA_HOST = SERVICE_HOST
+
 ALLOWED_HOSTS = (
+    'localhost',
+    'service-dot-myfallball.appspot.com',
+    SERVICE_HOST,
 )
 
 # Application definition
@@ -41,6 +47,9 @@ MIDDLEWARE_CLASSES = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ('Location',)
+CORS_ORIGIN_WHITELIST = ('localhost', SPA_HOST, SERVICE_HOST)
 
 ROOT_URLCONF = 'fallball.urls'
 
@@ -105,7 +114,7 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False,
+            'propagate': True,
         },
     },
 }

@@ -7,13 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_jwt.settings import api_settings
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
-                                     UserAuthorizationSerializer)
-from fallballapp.utils import (get_app_username, get_object_or_403, is_superuser, is_application)
+                                     ResellerNameSerializer, UserAuthorizationSerializer)
+from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token,
+                               is_superuser, is_application)
 
 
 class ApplicationViewSet(ModelViewSet):
@@ -40,7 +41,7 @@ class ApplicationViewSet(ModelViewSet):
 
 
 class ResellerViewSet(ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     serializer_class = ResellerSerializer
     queryset = Reseller.objects.all()
@@ -59,9 +60,23 @@ class ResellerViewSet(ModelViewSet):
         User.objects.filter(username=username).delete()
         return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
 
-    @is_application
     def list(self, request, *args, **kwargs):
-        queryset = Reseller.objects.filter(application=kwargs['application'])
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            resellers = Reseller.objects.filter(application=application)
+        else:
+            resellers = Reseller.objects.filter(owner=request.user)
+            if not resellers:
+                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                if not admin:
+                    return Response("Resellers do not exist for such account",
+                                    status=HTTP_404_NOT_FOUND)
+
+                queryset = [admin.client.reseller, ]
+                serializer = ResellerNameSerializer(queryset, many=True)
+                return Response(serializer.data)
+
+        queryset = resellers
         serializer = ResellerSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -98,7 +113,7 @@ class ClientViewSet(ModelViewSet):
     """
     queryset = Client.objects.all().order_by('-id')
     serializer_class = ClientSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     lookup_field = 'name'
 
@@ -200,7 +215,7 @@ class ClientViewSet(ModelViewSet):
 class ClientUserViewSet(ModelViewSet):
     queryset = ClientUser.objects.all().order_by('-id')
     serializer_class = ClientUserSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     lookup_field = 'email'
     # Redefine regex in order to get user email as id
@@ -318,11 +333,7 @@ class ClientUserViewSet(ModelViewSet):
         if not client_user:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
 
-        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-        payload = jwt_payload_handler(client_user)
-        token = jwt_encode_handler(payload)
-
+        token = get_jwt_token(client_user)
         return Response(token, status=status.HTTP_200_OK)
 
 

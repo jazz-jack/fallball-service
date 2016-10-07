@@ -235,6 +235,29 @@ class BaseTestCase(TestCase):
         code = user_request.get(url).status_code
         self.assertEqual(code, 404)
 
+    def test_reseller_retrieve(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        app_request = _get_client(admin.client.reseller.application.owner)
+        url = reverse('v1:resellers-list')
+        answer = app_request.get(url)
+        self.assertEqual(answer.status_code, 200)
+        self.assertTrue('token' in answer.data[0])
+
+        reseller_request = _get_client(admin.client.reseller.owner)
+        code = reseller_request.get(url).status_code
+        self.assertEqual(code, 200)
+        self.assertTrue('token' in answer.data[0])
+
+        user_request = _get_client(admin.user)
+        answer = user_request.get(url)
+        self.assertEqual(answer.status_code, 200)
+        self.assertFalse('token' in answer.data[0])
+
+        not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
+        user_request = _get_client(not_admin.user)
+        code = user_request.get(url).status_code
+        self.assertEqual(code, 404)
+
     def test_user_mgmt_under_admin(self):
         admin = ClientUser.objects.filter(admin=True).first()
         client_name = admin.client.name
