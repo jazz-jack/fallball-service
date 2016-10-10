@@ -11,11 +11,11 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     python manage.py migrate
     ```
-2. Load initial data
+1. Load initial data
     ```
     python manage.py loaddata initial_data
     ```
-4. In order to run server you need to execute the following command from the root folder of the project:
+1. In order to run server you need to execute the following command from the root folder of the project:
     ```
     python manage.py runserver <host_name>:<port>
     ```
@@ -25,7 +25,7 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     docker-compose up
     ```
-2. Run kickstart script:
+1. Run kickstart script:
     ```
     docker exec -it fallballapp bash kickstart.sh
     ```
