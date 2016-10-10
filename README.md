@@ -11,31 +11,21 @@ This dummy service helps developers to learn [APS Lite](http://aps.odin.com) tec
     ```
     python manage.py migrate
     ```
-2. Load initial data
+1. Load initial data
     ```
     python manage.py loaddata initial_data
     ```
-
-3. Copy and edit config according your needs:
-    ```
-    cp fallball/fallball_settings.py fallball/settings.py
-    ```
-
-4. In order to run server you need to execute the following command from the root folder of the project:
+1. In order to run server you need to execute the following command from the root folder of the project:
     ```
     python manage.py runserver <host_name>:<port>
     ```
 
 ## Deploy into docker container
-1. Copy and edit config according your needs:
-    ```
-    cp fallball/fallball_settings.py fallball/settings.py
-    ```
-2. Run docker-compose:
+1. Run docker-compose:
     ```
     docker-compose up
     ```
-3. Run kickstart script:
+1. Run kickstart script:
     ```
     docker exec -it fallballapp bash kickstart.sh
     ```

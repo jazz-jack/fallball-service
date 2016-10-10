@@ -162,5 +162,3 @@ REST_FRAMEWORK = {
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
 }
-
-APP_DATA = os.path.join(BASE_DIR, 'fallballapp/fixtures/app_data.json')
