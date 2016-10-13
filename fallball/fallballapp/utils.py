@@ -40,8 +40,12 @@ def get_model_object(user):
     if client_user:
         return client_user
 
+    return None
+
+
 
 def get_application_of_object(obj):
+    app = None
     if isinstance(obj, Application):
         return obj
     elif isinstance(obj, Reseller):
@@ -49,10 +53,7 @@ def get_application_of_object(obj):
     elif isinstance(obj, ClientUser):
         return obj.client.reseller.application
 
-    try:
-        return app
-    except NameError:
-        print('There is no object for such user')
+    return app
 
 
 def is_superuser(f):

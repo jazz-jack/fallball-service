@@ -82,8 +82,8 @@ DATABASES = {
         'NAME': 'fallball',
         'USER': 'root',
         'PORT': '3306',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
+        'PASSWORD': '',
+        'HOST': 'fbdb',
         'TEST': {
             'NAME': 'fallball_test'
         }
