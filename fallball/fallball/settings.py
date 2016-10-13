@@ -155,7 +155,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': timedelta(seconds=7200),
+    'JWT_EXPIRATION_DELTA': timedelta(seconds=2 * 60 * 60),
 }
 
 REST_FRAMEWORK = {
