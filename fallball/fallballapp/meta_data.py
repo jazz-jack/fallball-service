@@ -83,4 +83,4 @@ def load_app_data(app_instance):
                                                          password=user_template['password'])
                         params = dict.copy(user_template)
                         params.pop('users', None)
-                        ClientUser.objects.create(client=client, user=owner, **params)
+                        ClientUser.objects.create(client=client, owner=owner, **params)

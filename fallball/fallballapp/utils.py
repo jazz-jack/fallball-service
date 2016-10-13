@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework_jwt.settings import api_settings
 from rest_framework.response import Response
 
-from fallballapp.models import Application
+from fallballapp.models import Application, Reseller, ClientUser
 
 
 def get_object_or_403(*args, **kwargs):
@@ -25,6 +25,34 @@ def get_jwt_token(user):
     jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
     payload = jwt_payload_handler(user)
     return jwt_encode_handler(payload)
+
+
+def get_model_object(user):
+    application = Application.objects.filter(owner=user).first()
+    if application:
+        return application
+
+    reseller = Reseller.objects.filter(owner=user).first()
+    if reseller:
+        return reseller
+
+    client_user = ClientUser.objects.filter(owner=user).first()
+    if client_user:
+        return client_user
+
+
+def get_application_of_object(obj):
+    if isinstance(obj, Application):
+        return obj
+    elif isinstance(obj, Reseller):
+        return obj.application
+    elif isinstance(obj, ClientUser):
+        return obj.client.reseller.application
+
+    try:
+        return app
+    except NameError:
+        print('There is no object for such user')
 
 
 def is_superuser(f):

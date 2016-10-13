@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ('admin', models.BooleanField(default=False)),
                 ('limit', models.IntegerField()),
                 ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='fallballapp.Client')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
