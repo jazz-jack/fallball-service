@@ -1,5 +1,6 @@
 from datetime import timedelta
 import os
+import sys
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -106,6 +107,7 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'stream': sys.stdout,
         },
     },
     'loggers': {
