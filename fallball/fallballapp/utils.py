@@ -43,7 +43,6 @@ def get_model_object(user):
     return None
 
 
-
 def get_application_of_object(obj):
     app = None
     if isinstance(obj, Application):

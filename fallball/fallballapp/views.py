@@ -338,7 +338,8 @@ class ClientUserViewSet(ModelViewSet):
 
 
 class UsersViewSet(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = ClientUser.objects.all()
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
 
     def list(self, request, *args, **kwargs):
         queryset = ClientUser.objects.filter(owner_id=request.user.id).first()
