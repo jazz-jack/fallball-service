@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -8,6 +9,13 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+try:
+    import urllib.parse as urlparse
+    from urllib.parse import urlencode
+except ImportError:
+    import urlparse
+    from urllib import urlencode
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
@@ -335,6 +343,35 @@ class ClientUserViewSet(ModelViewSet):
 
         token = get_jwt_token(user)
         return Response(token, status=status.HTTP_200_OK)
+
+    @detail_route(methods=['get'])
+    def link(self, request, **kwargs):
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            application_id = application.id
+        else:
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                return Response("Could not determine application", status=HTTP_404_NOT_FOUND)
+            application_id = reseller.application.id
+        path = 'auth'
+        query = {'manual': True}
+        try:
+            resp = self.token(request, **kwargs)
+            if resp.status_code == status.HTTP_200_OK:
+                path = 'auth'
+                query = {'token': resp.data}
+        except:
+            pass
+
+        login_link = urlparse.urlunparse(urlparse.urlparse('')._replace(
+            scheme='https',
+            netloc='.'.join([application_id, settings.SPA_HOST]),
+            path=path,
+            query=urlencode(query)))
+
+        return Response(login_link, status=status.HTTP_200_OK)
 
 
 class UsersViewSet(ModelViewSet):
