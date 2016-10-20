@@ -18,7 +18,7 @@ class RequestLogMiddleware(object):
         app_id = None
         reseller_name = None
 
-        try
+        try:
             if reverse('v1:resellers-list') in request.path:
                 obj = get_model_object(request.user)
                 app_id = get_application_of_object(obj).id
