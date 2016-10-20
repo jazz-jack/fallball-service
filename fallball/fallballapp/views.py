@@ -67,7 +67,7 @@ class ResellerViewSet(ModelViewSet):
         else:
             resellers = Reseller.objects.filter(owner=request.user)
             if not resellers:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Resellers do not exist for such account",
                                     status=HTTP_404_NOT_FOUND)
@@ -169,7 +169,7 @@ class ClientViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
                 if not admin.client.name == kwargs['name']:
@@ -230,7 +230,7 @@ class ClientUserViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
                 reseller = admin.client.reseller
@@ -257,7 +257,7 @@ class ClientUserViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
                 reseller = admin.client.reseller
@@ -277,7 +277,7 @@ class ClientUserViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
                 reseller = admin.client.reseller
@@ -296,7 +296,7 @@ class ClientUserViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
                 if not admin.client.name == kwargs['client_name']:
@@ -323,24 +323,25 @@ class ClientUserViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(user=request.user, admin=True).first()
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
                 if not admin:
                     return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
                 reseller = admin.client.reseller
 
         client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
-        client_user = ClientUser.objects.filter(client=client, email=kwargs['email']).first().user
-        if not client_user:
+        user = ClientUser.objects.filter(client=client, email=kwargs['email']).first().owner
+        if not user:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
 
-        token = get_jwt_token(client_user)
+        token = get_jwt_token(user)
         return Response(token, status=status.HTTP_200_OK)
 
 
 class UsersViewSet(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = ClientUser.objects.all()
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
 
     def list(self, request, *args, **kwargs):
-        queryset = ClientUser.objects.filter(user_id=request.user.id).first()
+        queryset = ClientUser.objects.filter(owner_id=request.user.id).first()
         serializer = UserAuthorizationSerializer(queryset)
         return Response(serializer.data)

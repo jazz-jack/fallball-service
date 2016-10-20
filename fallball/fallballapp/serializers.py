@@ -137,7 +137,7 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
         username = get_app_username(self.initial_data['application_id'], validated_data['email'])
         user = User.objects.create_user(username=username,
                                         password=validated_data['password'])
-        return ClientUser.objects.create(usage=usage, user=user,
+        return ClientUser.objects.create(usage=usage, owner=user,
                                          client=self.initial_data['client'], **validated_data)
 
 
@@ -155,4 +155,4 @@ class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
         return obj.client.name
 
     def get_token(self, obj):
-        return get_jwt_token(obj.user)
+        return get_jwt_token(obj.owner)

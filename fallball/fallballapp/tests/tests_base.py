@@ -224,13 +224,13 @@ class BaseTestCase(TestCase):
         code = reseller_request.get(url).status_code
         self.assertEqual(code, 200)
 
-        user_request = _get_client(admin.user)
+        user_request = _get_client(admin.owner)
 
         code = user_request.get(url).status_code
         self.assertEqual(code, 200)
 
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
-        user_request = _get_client(not_admin.user)
+        user_request = _get_client(not_admin.owner)
 
         code = user_request.get(url).status_code
         self.assertEqual(code, 404)
@@ -248,13 +248,13 @@ class BaseTestCase(TestCase):
         self.assertEqual(code, 200)
         self.assertTrue('token' in answer.data[0])
 
-        user_request = _get_client(admin.user)
+        user_request = _get_client(admin.owner)
         answer = user_request.get(url)
         self.assertEqual(answer.status_code, 200)
         self.assertFalse('token' in answer.data[0])
 
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
-        user_request = _get_client(not_admin.user)
+        user_request = _get_client(not_admin.owner)
         code = user_request.get(url).status_code
         self.assertEqual(code, 404)
 
@@ -262,11 +262,12 @@ class BaseTestCase(TestCase):
         admin = ClientUser.objects.filter(admin=True).first()
         client_name = admin.client.name
         reseller_name = admin.client.reseller.name
-        request = _get_client(admin.user)
+        request = _get_client(admin.owner)
 
         # List
         list_url = reverse('v1:users-list', kwargs={'reseller_name': reseller_name,
                                                     'client_name': client_name})
+
         code = request.get(list_url).status_code
         self.assertEqual(code, 200)
 
