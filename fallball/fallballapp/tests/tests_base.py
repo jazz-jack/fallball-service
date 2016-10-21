@@ -294,3 +294,22 @@ class BaseTestCase(TestCase):
         # Delete
         code = request.delete(url).status_code
         self.assertEqual(code, 204)
+
+    def test_login_link(self):
+        user = ClientUser.objects.filter(admin=True).first()
+        reseller_request = _get_client(user.client.reseller.owner)
+        url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
+                                                 'client_name': user.client.name,
+                                                 'email': user.email})
+        # Get link for existing user
+        resp = reseller_request.get('{}{}'.format(url, 'link/'))
+        self.assertEqual(resp.status_code, 200)
+        assert 'token' in resp.data
+
+        url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
+                                                 'client_name': user.client.name,
+                                                 'email': 'random-user@does-not-exist.local'})
+        # Get link for non-existing user
+        resp = reseller_request.get('{}{}'.format(url, 'link/'))
+        self.assertEqual(resp.status_code, 200)
+        assert 'manual' in resp.data
