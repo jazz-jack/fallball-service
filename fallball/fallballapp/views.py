@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -339,7 +339,8 @@ class ClientUserViewSet(ModelViewSet):
 
 class UsersViewSet(ModelViewSet):
     queryset = ClientUser.objects.all()
-    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
+    authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication,
+                              BasicAuthentication)
 
     def list(self, request, *args, **kwargs):
         queryset = ClientUser.objects.filter(owner_id=request.user.id).first()
