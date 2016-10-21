@@ -33,19 +33,18 @@ class RequestLogMiddleware(object):
             if app_id:
                 log['response'] = {'app': app_id, }
             if reseller_name:
-                log['response']['reseller'] = reseller_name
+                log['reseller'] = reseller_name
             if response.content and response['content-type'] == 'application/json':
-                log['response']['response_body'] = json.loads(response.content.decode('utf-8'))
+                log['response']['body'] = json.loads(response.content.decode('utf-8'))
 
-            log['request']['request_headers'] = {
+            log['request']['headers'] = {
                 'CONTENT_TYPE': request.META['CONTENT_TYPE'],
                 'REQUEST_METHOD': request.META['REQUEST_METHOD'],
             }
 
-            log['response']['response_headers'] = response._headers
+            log['response']['headers'] = response._headers
 
-            logger.info(json.dumps(log['request']))
-            logger.info(json.dumps(log['response']))
+            logger.info(json.dumps(log))
 
         finally:
             return response
