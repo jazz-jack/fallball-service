@@ -28,15 +28,24 @@ class RequestLogMiddleware(object):
                 elif request.resolver_match.url_name != 'resellers-list':
                     reseller_name = request.resolver_match.kwargs['reseller_name']
 
-            log = {}
-            if app_id:
-                log = {'app': app_id, }
-            if reseller_name:
-                log['reseller'] = reseller_name
-            if response.content and response['content-type'] == 'application/json':
-                log['response_body'] = json.loads(response.content.decode('utf-8'))
+            log = {'request': {}, 'response': {}}
 
-            logger.info(json.dumps(log))
+            if app_id:
+                log['response'] = {'app': app_id, }
+            if reseller_name:
+                log['response']['reseller'] = reseller_name
+            if response.content and response['content-type'] == 'application/json':
+                log['response']['response_body'] = json.loads(response.content.decode('utf-8'))
+
+            log['request']['request_headers'] = {
+                'CONTENT_TYPE': request.META['CONTENT_TYPE'],
+                'REQUEST_METHOD': request.META['REQUEST_METHOD'],
+            }
+
+            log['response']['response_headers'] = response._headers
+
+            logger.info(json.dumps(log['request']))
+            logger.info(json.dumps(log['response']))
 
         finally:
             return response
