@@ -381,6 +381,7 @@ class ClientUserViewSet(ModelViewSet):
 
 class UsersViewSet(ModelViewSet):
     queryset = ClientUser.objects.all()
+    serializer_class = UserAuthorizationSerializer
     authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication,
                               BasicAuthentication)
 
