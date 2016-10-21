@@ -46,5 +46,6 @@ class RequestLogMiddleware(object):
 
             logger.info(json.dumps(log['request']))
             logger.info(json.dumps(log['response']))
+
         finally:
             return response
