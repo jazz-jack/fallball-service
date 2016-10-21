@@ -365,7 +365,7 @@ class ClientUserViewSet(ModelViewSet):
             resp = self.token(request, **kwargs)
             if resp.status_code == status.HTTP_200_OK:
                 query = {'token': resp.data}
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
 
         login_link = urlparse.urlunparse(urlparse.urlparse('')._replace(
