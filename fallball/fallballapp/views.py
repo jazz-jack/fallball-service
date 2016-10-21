@@ -371,9 +371,9 @@ class ClientUserViewSet(ModelViewSet):
             logger.error(e)
 
         login_link = urlparse.urlunparse(urlparse.urlparse('')._replace(
-            scheme='https',
+            scheme='http',
             netloc='.'.join([application_id, settings.SPA_HOST]),
-            path='auth',
+            path='#/auth',
             query=urlencode(query)))
 
         return Response(login_link, status=status.HTTP_200_OK)
