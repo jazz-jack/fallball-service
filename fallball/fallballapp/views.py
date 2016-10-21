@@ -339,9 +339,11 @@ class ClientUserViewSet(ModelViewSet):
                 reseller = admin.client.reseller
 
         client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
-        user = ClientUser.objects.filter(client=client, email=kwargs['email']).first().owner
-        if not user:
+        clientuser = ClientUser.objects.filter(client=client, email=kwargs['email']).first()
+        if not clientuser or not clientuser.owner:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
+
+        user = clientuser.owner
 
         token = get_jwt_token(user)
         return Response(token, status=status.HTTP_200_OK)
