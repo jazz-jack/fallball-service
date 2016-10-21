@@ -17,6 +17,8 @@ except ImportError:
     import urlparse
     from urllib import urlencode
 
+from fallballapp.middleware import logger
+
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
@@ -354,21 +356,22 @@ class ClientUserViewSet(ModelViewSet):
                                                owner=request.user).first()
             if not reseller:
                 return Response("Could not determine application", status=HTTP_404_NOT_FOUND)
+
             application_id = reseller.application.id
-        path = 'auth'
+
         query = {'manual': True}
+
         try:
             resp = self.token(request, **kwargs)
             if resp.status_code == status.HTTP_200_OK:
-                path = 'auth'
                 query = {'token': resp.data}
-        except:
-            pass
+        except Exception, e:
+            logger.error(e)
 
         login_link = urlparse.urlunparse(urlparse.urlparse('')._replace(
             scheme='https',
             netloc='.'.join([application_id, settings.SPA_HOST]),
-            path=path,
+            path='auth',
             query=urlencode(query)))
 
         return Response(login_link, status=status.HTTP_200_OK)
