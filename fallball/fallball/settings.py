@@ -83,8 +83,8 @@ DATABASES = {
         'NAME': 'fallball',
         'USER': 'root',
         'PORT': '3306',
-        'PASSWORD': '',
-        'HOST': 'fbdb',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
         'TEST': {
             'NAME': 'fallball_test'
         }
@@ -96,7 +96,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'simple': {
-            'format': '%(asctime)s %(levelname)s %(message)s'
+            'format': '%(message)s'
         },
         'verbose': {
             'format': '%(asctime)s %(name)s %(levelname)s %(message)s'
@@ -106,7 +106,7 @@ LOGGING = {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'simple',
             'stream': sys.stdout,
         },
     },
