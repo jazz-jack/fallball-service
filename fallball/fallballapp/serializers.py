@@ -1,5 +1,6 @@
 from random import randint
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from rest_framework import serializers as rest_serializers
 from rest_framework.authtoken.models import Token
@@ -28,7 +29,7 @@ class ApplicationSerializer(AuthorizationSerializer):
         fields = ('id', 'entrypoint', 'token')
 
     def get_entrypoint(self, obj):
-        return 'https://{}.connector.fallball.io/api/v1'.format(obj.id)
+        return 'https://{}/api/v1/'.format(settings.SERVICE_HOST)
 
     def create(self, validated_data):
         if User.objects.filter(username=validated_data['id']).exists():
