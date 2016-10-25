@@ -6,7 +6,8 @@ from rest_framework.authentication import TokenAuthentication, BasicAuthenticati
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
@@ -24,7 +25,12 @@ from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
                                      ResellerNameSerializer, UserAuthorizationSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token,
-                               is_superuser, is_application)
+                               is_superuser, is_application, get_user_context, free_space)
+
+
+class Description(APIView):
+    def get(self, request, format=None):
+        return Response({'description': 'Fallball - File sharing, that everyone learns'})
 
 
 class ApplicationViewSet(ModelViewSet):
@@ -231,97 +237,93 @@ class ClientUserViewSet(ModelViewSet):
     # Redefine regex in order to get user email as id
     lookup_value_regex = '[^@]+@[^@]+\.[^@/]+'
 
-    def create(self, request, *args, **kwargs):
-        application = Application.objects.filter(owner=request.user).first()
-        if application:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               application=application).first()
-        else:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               owner=request.user).first()
-            if not reseller:
-                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
-                if not admin:
-                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
-                reseller = admin.client.reseller
+    @get_user_context
+    def create(self, *args, **kwargs):
+        request = args[0]
+        client = kwargs['client']
+        reseller = kwargs['reseller']
 
-        client = get_object_or_404(Client, name=kwargs['client_name'], reseller=reseller)
+        if ClientUser.objects.filter(email=request.data['email'], client=kwargs['client']):
+            return Response("Such user already exists", status=status.HTTP_400_BAD_REQUEST)
+
+        if 'usage' in request.data:
+            return Response("Usage should not be specified", status=status.HTTP_400_BAD_REQUEST)
+
         # Check if client has free space for new user
-        free_space = client.limit - client.get_usage()
-        if free_space >= request.data['storage']['limit']:
+        space = free_space(client)
+        if space >= request.data['storage']['limit']:
             request.data['client'] = client
             request.data['application_id'] = reseller.application.id
             if 'admin' not in request.data:
                 request.data['admin'] = False
 
-            return ModelViewSet.create(self, request, *args, **kwargs)
+            return ModelViewSet.create(self, *args, **kwargs)
 
         return Response("Client limit is reached", status=status.HTTP_400_BAD_REQUEST)
 
-    def destroy(self, request, *args, **kwargs):
-        application = Application.objects.filter(owner=request.user).first()
-        if application:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               application=application).first()
-        else:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               owner=request.user).first()
-            if not reseller:
-                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
-                if not admin:
-                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
-                reseller = admin.client.reseller
-        client = get_object_or_404(Client, name=kwargs['client_name'], reseller=reseller)
-        client_user = get_object_or_404(ClientUser, email=kwargs['email'], client=client)
+    @get_user_context
+    def destroy(self, *args, **kwargs):
+        client_user = get_object_or_404(ClientUser, email=kwargs['email'], client=kwargs['client'])
         client_user.delete()
-        User.objects.filter(username='{}.{}'.format(reseller.application.id,
+        User.objects.filter(username='{}.{}'.format(kwargs['reseller'].application.id,
                                                     kwargs['email'])).delete()
         return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
 
-    def list(self, request, **kwargs):
-        application = Application.objects.filter(owner=request.user).first()
-        if application:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               application=application).first()
-        else:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               owner=request.user).first()
-            if not reseller:
-                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
-                if not admin:
-                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
-                reseller = admin.client.reseller
-
-        client = get_object_or_404(Client, reseller=reseller, name=kwargs['client_name'])
-        queryset = ClientUser.objects.filter(client=client)
+    @get_user_context
+    def list(self, *args, **kwargs):
+        queryset = ClientUser.objects.filter(client=kwargs['client'])
         serializer = ClientUserSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, *args, **kwargs):
-        application = Application.objects.filter(owner=request.user).first()
-        if application:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               application=application).first()
-        else:
-            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
-                                               owner=request.user).first()
-            if not reseller:
-                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
-                if not admin:
-                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
-                if not admin.client.name == kwargs['client_name']:
-                    return Response("Authorization failed", status=HTTP_403_FORBIDDEN)
-                reseller = admin.client.reseller
-
-        if not reseller:
-            return Response("Such reseller is not found", status=status.HTTP_404_NOT_FOUND)
-
-        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name']).first()
-        queryset = ClientUser.objects.filter(client=client, email=kwargs['email'])
+    @get_user_context
+    def retrieve(self, *args, **kwargs):
+        queryset = ClientUser.objects.filter(client=kwargs['client'], email=kwargs['email'])
         if not queryset:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
         serializer = ClientUserSerializer(queryset, many=True)
         return Response(serializer.data[0])
+
+    @get_user_context
+    def update(self, *args, **kwargs):
+        client_user = ClientUser.objects.filter(client=kwargs['client'],
+                                                email=kwargs['email']).first()
+
+        if not client_user:
+            args[0].data['email'] = kwargs['email']
+            return self.create(*args, **kwargs)
+
+        request = args[0]
+        if (all(field in request.data for field in ('password', 'storage')) and
+                all(field in request.data['storage'] for field in ('usage', 'limit'))):
+
+            limit = request.data['storage']['limit']
+            usage = request.data['storage']['usage']
+
+            space = free_space(kwargs['client'])
+            if space < limit or usage > limit:
+                return Response("Storage limit is reached", HTTP_400_BAD_REQUEST)
+
+            user = get_object_or_404(User, username=get_app_username(kwargs['application'],
+                                                                     kwargs['email']))
+            user.set_password(request.data['password'])
+
+            client_user = get_object_or_404(ClientUser, client=kwargs['client'],
+                                            email=kwargs['email'])
+            client_user.password = request.data['password']
+            client_user.usage = request.data['storage']['usage']
+            if 'admin' in request.data:
+                client_user.admin = True
+            client_user.limit = request.data['storage']['limit']
+
+            user.save()
+            client_user.save()
+
+            queryset = [client_user, ]
+            serializer = ClientUserSerializer(queryset, many=True)
+
+            return Response(serializer.data[0], status=status.HTTP_200_OK)
+
+        return Response("Wrong parameters", HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['get'])
     def token(self, request, **kwargs):

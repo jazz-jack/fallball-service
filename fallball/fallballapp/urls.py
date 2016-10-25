@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from rest_framework_nested import routers
 
 from .views import (ApplicationViewSet, ClientUserViewSet, ClientViewSet,
-                    ResellerViewSet, UsersViewSet)
+                    ResellerViewSet, UsersViewSet, Description)
 
 router = routers.SimpleRouter()
 
@@ -21,6 +21,7 @@ client_router = routers.NestedSimpleRouter(resellers_router, r'clients', lookup=
 client_router.register(r'users', ClientUserViewSet, base_name='users')
 
 urlpatterns = [
+    url(r'^$', Description.as_view()),
     url(r'^', include(router.urls)),
     url(r'^', include(resellers_router.urls)),
     url(r'^', include(client_router.urls)),

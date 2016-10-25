@@ -3,9 +3,10 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework_jwt.settings import api_settings
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.response import Response
 
-from fallballapp.models import Application, Reseller, ClientUser
+from fallballapp.models import Application, Reseller, Client, ClientUser
 
 
 def get_object_or_403(*args, **kwargs):
@@ -71,3 +72,44 @@ def is_application(f):
             return Response("Authorization failed", status=status.HTTP_403_FORBIDDEN)
         return f(application=application, *args, **kwargs)
     return wrapper
+
+
+def get_user_context(f):
+    def wrapper(*args, **kwargs):
+        request = args[1]
+
+        # check if context already exists
+        if all(field in kwargs for field in ('application', 'reseller', 'client')):
+            context = {}
+            for field in ('application', 'reseller', 'client'):
+                context[field] = kwargs.pop(field)
+            return f(application=context['application'], reseller=context['reseller'],
+                     client=context['client'], *args, **kwargs)
+
+        application = Application.objects.filter(owner=request.user).first()
+        if application:
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               application=application).first()
+        else:
+            reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
+                                               owner=request.user).first()
+            if not reseller:
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
+                if not admin:
+                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
+                if not admin.client.name == kwargs['client_name']:
+                    return Response("Authorization failed", status=HTTP_403_FORBIDDEN)
+                reseller = admin.client.reseller
+
+            application = reseller.application
+
+        if not reseller:
+            return Response("Such reseller is not found", status=status.HTTP_404_NOT_FOUND)
+
+        client = Client.objects.filter(reseller=reseller, name=kwargs['client_name']).first()
+        return f(application=application, reseller=reseller, client=client, *args, **kwargs)
+    return wrapper
+
+
+def free_space(owner):
+    return owner.limit - owner.get_usage()
