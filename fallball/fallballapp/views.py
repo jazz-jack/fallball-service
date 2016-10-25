@@ -1,3 +1,5 @@
+import pkg_resources
+
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -30,7 +32,11 @@ from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_toke
 
 class Description(APIView):
     def get(self, request, format=None):
-        return Response({'description': 'Fallball - File sharing, that everyone learns'})
+        env = pkg_resources.Environment()
+        res = env._distmap.get('fallball-connector', [None])[0]
+        version = res.version if res else ''
+        return Response({'description': 'Fallball - File sharing, that everyone learns',
+                         'version': version})
 
 
 class ApplicationViewSet(ModelViewSet):
