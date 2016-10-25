@@ -33,7 +33,7 @@ from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_toke
 class Description(APIView):
     def get(self, request, format=None):
         env = pkg_resources.Environment()
-        res = env._distmap.get('fallball-connector', [None])[0]
+        res = env._distmap.get('fallball', [None])[0]
         version = res.version if res else ''
         return Response({'description': 'Fallball - File sharing, that everyone learns',
                          'version': version})
