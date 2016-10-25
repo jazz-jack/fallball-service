@@ -313,3 +313,50 @@ class BaseTestCase(TestCase):
         resp = reseller_request.get('{}{}'.format(url, 'link/'))
         self.assertEqual(resp.status_code, 200)
         assert 'manual' in resp.data
+
+    def test_update_user(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        user = ClientUser.objects.filter(admin=False, client=admin.client).first()
+        request = _get_client(admin.owner)
+
+        url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
+                                                 'client_name': user.client.name,
+                                                 'email': user.email})
+
+        # limit is reached
+        resp = request.put(url, json.dumps({'email': user.email,
+                                            'storage': {'limit': user.limit,
+                                                        'usage': admin.client.limit + 1},
+                                            'password': 'password'}),
+                           content_type='application/json')
+
+        self.assertEqual(resp.status_code, 400)
+
+        # password and email successfully changed
+        resp = request.put(url, json.dumps({'storage': {'limit': user.limit,
+                                                        'usage': user.usage},
+                                            'password': 'password2'}),
+                           content_type='application/json')
+
+        changed_user = ClientUser.objects.get(id=user.id)
+
+        self.assertEqual(changed_user.password, 'password2')
+        self.assertTrue(changed_user.owner.check_password('password2'))
+
+        self.assertEqual(resp.status_code, 200)
+
+    def test_put_creation(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        request = _get_client(admin.owner)
+
+        url = reverse('v1:users-detail', kwargs={'reseller_name': admin.client.reseller.name,
+                                                 'client_name': admin.client.name,
+                                                 'email': 'new@sunnyflowers.tld'})
+
+        resp = request.put(url, json.dumps({'storage': {'limit': 5}, 'password': 'password'}),
+                           content_type='application/json')
+
+        self.assertTrue(ClientUser.objects.filter(email='new@sunnyflowers.tld',
+                                                  client=admin.client))
+
+        self.assertEqual(resp.status_code, 201)
