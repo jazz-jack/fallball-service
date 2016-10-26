@@ -1,5 +1,4 @@
 import json
-import random
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -152,16 +151,15 @@ class BaseTestCase(TestCase):
 
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request.post(url, json.dumps({'name': 'new_client',
-                                             'storage': {'limit': 20}}),
+                                             'storage': {'limit': reseller.limit - 10}}),
                             content_type='application/json')
 
         self.assertTrue(Client.objects.filter(name='new_client'))
 
-        client_limit = random.randint(reseller.limit, reseller.limit + 100)
-
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request.post(url,
-                            json.dumps({'name': 'new_client2', 'storage': {'limit': client_limit}}),
+                            json.dumps({'name': 'new_client2',
+                                        'storage': {'limit': reseller.limit + 100}}),
                             content_type='application/json')
 
         self.assertFalse(Client.objects.filter(name='new_client2'))
