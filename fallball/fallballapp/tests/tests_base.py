@@ -148,7 +148,7 @@ class BaseTestCase(TestCase):
         app = Application.objects.all().first()
         client_request = _get_client(app.owner.id)
 
-        reseller = Reseller.objects.filter().first()
+        reseller = Reseller.objects.filter(application=app).first()
 
         client_limit = random.randint(0, reseller.limit)
 
