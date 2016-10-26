@@ -150,11 +150,9 @@ class BaseTestCase(TestCase):
 
         reseller = Reseller.objects.filter(application=app).first()
 
-        client_limit = random.randint(0, reseller.limit)
-
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request.post(url, json.dumps({'name': 'new_client',
-                                             'storage': {'limit': client_limit}}),
+                                             'storage': {'limit': 20}}),
                             content_type='application/json')
 
         self.assertTrue(Client.objects.filter(name='new_client'))
