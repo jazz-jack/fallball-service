@@ -37,9 +37,10 @@ class RequestLogMiddleware(object):
             log['response']['body'] = json.loads(response.content.decode('utf-8'))
 
         log['request']['headers'] = {
-            'CONTENT_TYPE': request.META['CONTENT_TYPE'],
             'REQUEST_METHOD': request.META['REQUEST_METHOD'],
         }
+        if 'CONTENT_TYPE' in request.META:
+            log['request']['headers']['CONTENT_TYPE'] = request.META['CONTENT_TYPE'],
 
         log['response']['headers'] = response._headers
 
