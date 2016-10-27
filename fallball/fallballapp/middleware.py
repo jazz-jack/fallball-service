@@ -47,7 +47,6 @@ class RequestLogMiddleware(object):
             if reseller_name:
                 log['reseller'] = reseller_name
 
-
         logger.info(json.dumps(log))
 
         return response
