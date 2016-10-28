@@ -16,7 +16,7 @@ class RequestLogMiddleware(object):
 
     def process_response(self, request, response):
 
-        if 'user' not in request:
+        if not hasattr(request, 'user'):
             return response
 
         app_id = None
