@@ -15,6 +15,10 @@ class RequestLogMiddleware(object):
         request.start_time = time.time()
 
     def process_response(self, request, response):
+
+        if not hasattr(request, 'user'):
+            return response
+
         app_id = None
         reseller_name = None
 
