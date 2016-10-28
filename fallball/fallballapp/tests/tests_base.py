@@ -356,3 +356,32 @@ class BaseTestCase(TestCase):
                                                   client=admin.client))
 
         self.assertEqual(resp.status_code, 201)
+
+    def test_root_access(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+
+        root = User.objects.filter(is_superuser=True)
+        request = _get_client(root)
+
+        url = reverse('v1:resellers-detail', kwargs={'name': admin.client.reseller.name, })
+        resp = request.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': admin.client.reseller.name,
+                                                   'name': admin.client.name, })
+        resp = request.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_unauthorized_access(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+
+        request = APIClient()
+
+        url = reverse('v1:resellers-detail', kwargs={'name': admin.client.reseller.name, })
+        resp = request.get(url)
+        self.assertEqual(resp.status_code, 401)
+
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': admin.client.reseller.name,
+                                                   'name': admin.client.name, })
+        resp = request.get(url)
+        self.assertEqual(resp.status_code, 401)
