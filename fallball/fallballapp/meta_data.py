@@ -8,6 +8,7 @@ from fallballapp.utils import get_app_username
 data = [
     {
         'name': 'reseller_a',
+        'rid': '32f57666-6e78-4080-b1c0-43111d2b5af8',
         'limit': 300,
         'clients': [
             {
@@ -52,10 +53,12 @@ data = [
     },
     {
         'name': 'reseller_b',
+        'rid': 'f0e75b19-e668-48ef-92c5-af309faf3735',
         'limit': 350
     },
     {
         'name': 'reseller_c',
+        'rid': '40a230cd-e2cb-4176-b384-05a185ed1028',
         'limit': 400
     }
 ]
