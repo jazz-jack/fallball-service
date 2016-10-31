@@ -13,6 +13,7 @@ class Application(models.Model):
 
 class Reseller(models.Model):
     name = models.CharField(max_length=120)
+    rid = models.CharField("Reseller ID", max_length=120, unique=True)
     application = models.ForeignKey(Application)
     limit = models.IntegerField()
     # owner property is a foreign key related to User instance
@@ -20,7 +21,7 @@ class Reseller(models.Model):
     owner = models.ForeignKey(User)
 
     class Meta:
-        unique_together = ('application', 'name')
+        unique_together = (('application', 'name'), ('application', 'rid'))
 
     def __str__(self):
         return self.name
