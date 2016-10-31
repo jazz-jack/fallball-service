@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
@@ -23,6 +24,7 @@ except ImportError:
 from fallballapp.middleware import logger
 
 from fallballapp.models import Application, Client, ClientUser, Reseller
+from fallballapp.renderers import PlainTextRenderer
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
                                      ResellerNameSerializer, UserAuthorizationSerializer)
@@ -235,6 +237,7 @@ class ClientViewSet(ModelViewSet):
 
 
 class ClientUserViewSet(ModelViewSet):
+    renderer_classes = (JSONRenderer, PlainTextRenderer,)
     queryset = ClientUser.objects.all().order_by('-id')
     serializer_class = ClientUserSerializer
     authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
