@@ -368,7 +368,10 @@ class ClientUserViewSet(ModelViewSet):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                return Response("Could not determine application", status=HTTP_404_NOT_FOUND)
+                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
+                if not admin:
+                    return Response("Could not determine application", status=HTTP_404_NOT_FOUND)
+                reseller = admin.client.reseller
 
             application_id = reseller.application.id
 
