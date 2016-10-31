@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=120)),
-                ('rid', models.CharField(default='test', max_length=120, verbose_name='Reseller ID')),
+                ('rid', models.CharField(max_length=120, verbose_name='Reseller ID')),
                 ('limit', models.IntegerField()),
                 ('application', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='fallballapp.Application')),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
