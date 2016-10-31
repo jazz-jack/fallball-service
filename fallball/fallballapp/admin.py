@@ -47,7 +47,8 @@ class ClientInline(BaseInline):
 class ResellerAdmin(admin.ModelAdmin):
     readonly_fields = []
     inlines = [ClientInline, ]
-    list_display = ('name', 'rid', 'application', 'get_usage', 'limit', 'token', 'get_clients_amount')
+    list_display = (
+        'name', 'rid', 'application', 'get_usage', 'limit', 'token', 'get_clients_amount')
 
     def get_readonly_fields(self, request, reseller=None):
         if reseller:
@@ -91,6 +92,7 @@ class ClientUserAdmin(admin.ModelAdmin):
         if client_user:
             return self.readonly_fields + ['email', 'client', 'password', 'owner', 'limit']
         return self.readonly_fields
+
 
 admin.site.register(Application, ApplicationAdmin)
 admin.site.register(Reseller, ResellerAdmin)
