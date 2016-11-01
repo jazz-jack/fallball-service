@@ -9,11 +9,11 @@ from rest_framework.test import APIClient
 from fallballapp.models import Application, Reseller, Client, ClientUser
 
 
-def _get_client(user_id):
+def _get_client(user_id, accept='application/json'):
     """
     Returns request object with admin token
     """
-    client = APIClient()
+    client = APIClient(HTTP_ACCEPT=accept)
     token = Token.objects.filter(user_id=user_id).first()
     if not token:
         token = Token.objects.create(user_id=user_id)
@@ -293,12 +293,13 @@ class BaseTestCase(TestCase):
 
     def test_login_link(self):
         user = ClientUser.objects.filter(admin=True).first()
-        reseller_request = _get_client(user.client.reseller.owner)
+        reseller_request = _get_client(user.client.reseller.owner, accept='text/plain')
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
                                                  'email': user.email})
         # Get link for existing user
         resp = reseller_request.get('{}{}'.format(url, 'link/'))
+        self.assertTrue('text/plain; charset=utf-8' in resp._headers['content-type'])
         self.assertEqual(resp.status_code, 200)
         assert 'token' in resp.data
 
