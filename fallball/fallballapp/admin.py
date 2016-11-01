@@ -14,7 +14,7 @@ class BaseInline(admin.TabularInline):
 class ResellerInline(BaseInline):
     model = Reseller
     extra = 0
-    readonly_fields = ['name', 'limit', 'owner']
+    readonly_fields = ['name', 'rid', 'limit', 'owner']
 
     def has_add_permission(self, request):
         return False
@@ -47,11 +47,12 @@ class ClientInline(BaseInline):
 class ResellerAdmin(admin.ModelAdmin):
     readonly_fields = []
     inlines = [ClientInline, ]
-    list_display = ('name', 'application', 'get_usage', 'limit', 'token', 'get_clients_amount')
+    list_display = (
+        'name', 'rid', 'application', 'get_usage', 'limit', 'token', 'get_clients_amount')
 
     def get_readonly_fields(self, request, reseller=None):
         if reseller:
-            return self.readonly_fields + ['name', 'owner', 'application', ]
+            return self.readonly_fields + ['name', 'rid', 'owner', 'application', ]
         return self.readonly_fields
 
     def token(self, obj):
@@ -91,6 +92,7 @@ class ClientUserAdmin(admin.ModelAdmin):
         if client_user:
             return self.readonly_fields + ['email', 'client', 'password', 'owner', 'limit']
         return self.readonly_fields
+
 
 admin.site.register(Application, ApplicationAdmin)
 admin.site.register(Reseller, ResellerAdmin)

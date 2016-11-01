@@ -59,7 +59,7 @@ class ResellerSerializer(AuthorizationSerializer):
 
     class Meta:
         model = Reseller
-        fields = ('name', 'token', 'clients_amount', 'storage')
+        fields = ('name', 'rid', 'token', 'clients_amount', 'storage')
 
     def create(self, validated_data):
         """
