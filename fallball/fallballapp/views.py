@@ -265,6 +265,9 @@ class ClientUserViewSet(ModelViewSet):
             request.data['application_id'] = reseller.application.id
             if 'admin' not in request.data:
                 request.data['admin'] = False
+            if 'password' in request.data:
+                return Response("Password should not be specified",
+                                status=status.HTTP_400_BAD_REQUEST)
 
             return ModelViewSet.create(self, *args, **kwargs)
 
@@ -318,6 +321,7 @@ class ClientUserViewSet(ModelViewSet):
 
             client_user = get_object_or_404(ClientUser, client=kwargs['client'],
                                             email=kwargs['email'])
+            client_user.password = request.data['password']
             client_user.usage = request.data['storage']['usage']
             if 'admin' in request.data:
                 client_user.admin = True

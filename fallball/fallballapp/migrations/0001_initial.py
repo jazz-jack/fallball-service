@@ -37,6 +37,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.EmailField(max_length=254)),
+                ('password', models.CharField(max_length=12)),
                 ('usage', models.IntegerField(blank=True)),
                 ('admin', models.BooleanField(default=False)),
                 ('limit', models.IntegerField()),

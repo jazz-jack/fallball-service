@@ -127,10 +127,11 @@ class StorageClientUserSerializer(rest_serializers.HyperlinkedModelSerializer):
 class ClientUserSerializer(rest_serializers.ModelSerializer):
     storage = StorageClientUserSerializer(source='*')
     admin = rest_serializers.BooleanField()
+    password = rest_serializers.CharField(required=False)
 
     class Meta:
         model = ClientUser
-        fields = ('email', 'storage', 'admin')
+        fields = ('email', 'password', 'storage', 'admin')
 
     def create(self, validated_data):
         # Usage is random but not more than limit

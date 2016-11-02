@@ -346,7 +346,7 @@ class BaseTestCase(TestCase):
                                                  'client_name': admin.client.name,
                                                  'email': 'new@sunnyflowers.tld'})
 
-        resp = request.put(url, json.dumps({'storage': {'limit': 5}, 'password': 'password'}),
+        resp = request.put(url, json.dumps({'storage': {'limit': 5}}),
                            content_type='application/json')
 
         self.assertTrue(ClientUser.objects.filter(email='new@sunnyflowers.tld',
