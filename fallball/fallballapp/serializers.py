@@ -105,7 +105,7 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('name', 'creation_date', 'users_amount', 'storage')
+        fields = ('name', 'creation_date', 'users_amount', 'storage', 'is_integrated')
 
     def create(self, validated_data):
         """

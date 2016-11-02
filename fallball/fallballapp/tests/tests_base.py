@@ -407,3 +407,25 @@ class BaseTestCase(TestCase):
 
         user = ClientUser.objects.get(client=client, email='new@sunnyflowers.tld').owner
         self.assertTrue(user.check_password('newpassword'))
+
+    def test_integrated_client(self):
+        reseller = Reseller.objects.all().first()
+        request = _get_client(reseller.owner)
+
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        resp = request.post(url, json.dumps({'name': 'integrated_company',
+                                             'storage': {'limit': 80},
+                                             'is_integrated': True}),
+                            content_type='application/json')
+        self.assertEqual(resp.status_code, 201)
+
+        client = Client.objects.get(name='integrated_company')
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': client.name})
+        resp = request.post(url, json.dumps({'email': 'new@sunnyflowers.tld',
+                                             'storage': {'limit': 5}}),
+                            content_type='application/json')
+        self.assertEqual(resp.status_code, 403)
+
+        resp = request.get(url, content_type='application/json')
+        self.assertEqual(resp.status_code, 403)
