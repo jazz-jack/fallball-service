@@ -5,7 +5,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -116,20 +116,6 @@ class ResellerViewSet(ModelViewSet):
         serializer = ResellerSerializer(queryset, many=True)
         return Response(serializer.data[0])
 
-    @detail_route(methods=['get'])
-    def reset(self, request, *args, **kwargs):
-        """
-        Repair particular reseller
-        """
-        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    @list_route(methods=['get'])
-    def reset_all(self, request, *args, **kwargs):
-        """
-        Repair all resellers
-        """
-        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
 
 class ClientViewSet(ModelViewSet):
     """
@@ -220,20 +206,6 @@ class ClientViewSet(ModelViewSet):
             client.delete()
             return Response('Client has been deleted', status=status.HTTP_204_NO_CONTENT)
         return Response('Such client does not exist', status=status.HTTP_400_BAD_REQUEST)
-
-    @detail_route(methods=['get'])
-    def reset(self, request, *args, **kwargs):
-        """
-        Recreate client to initial state
-        """
-        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    @list_route(methods=['get'])
-    def reset_all(self, request, *args, **kwargs):
-        """
-        Recreate all reseller clients to initial state
-        """
-        return Response("Method is not implemented yet", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ClientUserViewSet(ModelViewSet):

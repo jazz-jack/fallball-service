@@ -107,6 +107,11 @@ def get_user_context(f):
             return Response("Such reseller is not found", status=status.HTTP_404_NOT_FOUND)
 
         client = Client.objects.filter(reseller=reseller, name=kwargs['client_name']).first()
+
+        if client.is_integrated is True:
+            return Response("User management for this client is disabled",
+                            status=status.HTTP_403_FORBIDDEN)
+
         return f(application=application, reseller=reseller, client=client, *args, **kwargs)
     return wrapper
 

@@ -28,6 +28,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=150)),
+                ('is_integrated', models.BooleanField(default=False)),
                 ('creation_date', models.DateTimeField(auto_now_add=True)),
                 ('limit', models.IntegerField()),
             ],
