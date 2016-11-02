@@ -30,21 +30,18 @@ data = [
                         'email': 'johnson@sunnyflowers.tld',
                         'usage': 3,
                         'admin': False,
-                        'password': 'password',
                         'limit': 5
                     },
                     {
                         'email': 'brown@sunnyflowers.tld',
                         'usage': 2,
                         'admin': False,
-                        'password': 'password',
                         'limit': 6
                     },
                     {
                         'email': 'williams@sunnyflowers.tld',
                         'usage': 1,
                         'admin': True,
-                        'password': 'password',
                         'limit': 4
                     }
                 ]
@@ -82,8 +79,7 @@ def load_app_data(app_instance):
                 if 'users' in client_template:
                     for user_template in client_template['users']:
                         username = get_app_username(app_instance.id, user_template['email'])
-                        owner = User.objects.create_user(username=username,
-                                                         password=user_template['password'])
+                        owner = User.objects.create_user(username=username)
                         params = dict.copy(user_template)
                         params.pop('users', None)
                         ClientUser.objects.create(client=client, owner=owner, **params)
