@@ -266,8 +266,7 @@ class ClientUserViewSet(ModelViewSet):
             if 'admin' not in request.data:
                 request.data['admin'] = False
             if 'password' in request.data:
-                return Response("Password should not be specified",
-                                status=status.HTTP_400_BAD_REQUEST)
+                request.data.pop('password')
 
             return ModelViewSet.create(self, *args, **kwargs)
 

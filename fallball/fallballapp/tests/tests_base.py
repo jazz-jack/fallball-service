@@ -54,7 +54,8 @@ class BaseTestCase(TestCase):
         url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
                                                'client_name': 'new_client'})
         client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
-                                             'storage': {'limit': 30}}),
+                                             'storage': {'limit': 30},
+                                             'password': 'password'}),
                             content_type='application/json')
 
         self.assertTrue(Client.objects.filter(name='new_client'))
