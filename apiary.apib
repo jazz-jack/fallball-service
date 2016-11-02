@@ -1,0 +1,270 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# Fallball
+
+Fallball solution is a test service, which provides you with such functionality as documents sharing, collaboration tools and so on.
+
+## General Information Collection [/v1/]
+
+### Get Fallball Service Information [GET]
+    
++ Response 200 (application/json)
+
+        [
+            {
+                "description": "Fallball API allows you manage resellers, companies, users" 
+            }
+        ]
+
+## Resellers Collection [/v1/resellers/]
+
+### List All Resellers [GET]
+    
++ Response 200 (application/json)
+
+        [
+            {
+                "name": "reseller_a", 
+                "clients_amount": 25,
+                "token": "35b77ce0-502f-11e4-9b31-25bca9fc0b20"
+                "storage": { 
+                    "usage": "250", 
+                    "limit": 800
+                }
+            },
+            {
+                "name": "reseller_b", 
+                "clients_amount": 20, 
+                "token": "2dd5975f6d9c3199f702540925ba79572f6bf3e6",
+                "storage": { 
+                    "usage": "203", 
+                    "limit": 500
+                }
+            }
+        ]
+
+### Create New Reseller [POST]
+
++ Request (application/json)
+
+        {
+            "name": "reseller_a", 
+            "storage": {
+                "limit": 800
+            }
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "name": "reseller_a", 
+            "clients_amount": 0,
+            "token": "2dd5975f6d9c3199f702540925ba79572f6bf3e6",
+            "storage": { 
+                    "usage": 0, 
+                    "limit": 800
+            }
+        }
+
+## Reset Resellers to Initial State Collection [/v1/resellers/reset_all/]
+
+### Reset Resellers [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "result": "true", 
+            }
+        ]
+
+## Reseller collection [/v1/reseller/{reseller_name}/]
+        
+### Get Reseller Information [GET]
+
++ Response 200 (application/json)
+
+        {
+            "name": "reseller_a", 
+            "token": "35b77ce0-502f-11e4-9b31-25bca9fc0b20",
+            "clients_amount": 25, 
+            "storage": { 
+                    "usage": 250, 
+                    "limit": 800
+            }
+        }
+    
+### Delete Reseller [DELETE]
+
++ Response 204
+
+## Reset Reseller to Initial State Collection [/v1/resellers/{reseller_name}/reset/]
+
+### Reset Reseller [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "result": "true", 
+            }
+        ]
+
+## Clients Collection [/v1/resellers/{reseller_name}/clients/]
+
+### List All Clients [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "name": "client_a",
+                "creation_date": "2016-03-22T06:12:27+00:00",
+                "users_amount": 12, 
+                "storage": { 
+                    "usage": 250, 
+                    "limit": 800
+                }
+            }
+        ]
+    
+### Create New Client [POST]
+    
++ Request (application/json)
+
+        {
+            "name": "client_a", 
+            "storage": {
+                "limit": 200
+            }
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "name": "client_a",
+            "creation_date": "2016-03-22T06:12:27+00:00",
+            "users_amount": 0,
+            "storage": { 
+                    "usage": 250, 
+                    "limit": 800
+            }
+        }
+
+### Delete Client [DELETE]
+
++ Response 204
+
+## Reset Clients to Initial State Collection [/v1/resellers/{reseller_name}/clients/reset_all/]
+
+### Reset Client [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "result": "true", 
+            }
+        ]
+
+## Client Collection [/v1/resellers/{reseller_name}/clients/{client_name}/]
+
+### Get Client Information [GET]
+
++ Response 200 (application/json)
+
+        {
+            "name": "client_a",
+            "creation_date": "2016-03-22T06:12:27+00:00",
+            "users_amount": 12, 
+            "storage": { 
+                    "usage": 250, 
+                    "limit": 800
+            }
+        }
+
+
+    
+### Delete Client [DELETE]
+
++ Response 204
+
+## Reset Client to Initial State Collection [/v1/resellers/{reseller_name}/clients/{client_name}/reset/]
+
+### Reset Client [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "result": "true", 
+            }
+        ]
+
+## Users Collection [/v1/resellers/{reseller_name}/clients/{client_name}/users/]
+
+### List All Users [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "email": "john@company.com",
+                "password": "D7H3kj8",
+                "admin": true, 
+                "storage": { 
+                    "usage": 15, 
+                    "limit": 32
+                }
+            }
+        ]
+
+    
+### Create New User [POST]
+
++ Request (application/json)
+
+        {
+            "email": "john@company.com", 
+            "password": "D7H3kj8",
+            "admin": true
+            "storage": {
+                "limit": 200
+            }
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "email": "john@company.com",
+            "password": "D7H3kj8",
+            "admin": true, 
+            "storage": { 
+                    "usage": "15", 
+                    "limit": "32"
+            }
+        }
+
+## User Collection [/v1/resellers/{reseller_name}/clients/{client_name}/users/{email}/]
+
+### Get User Information [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "email": "john@company.com",
+            "password": "D7H3kj8",
+            "admin": true, 
+            "storage": { 
+                    "usage": "15", 
+                    "limit": "32"
+            }
+        }
+        
+### Delete User [DELETE]
+
++ Response 204
