@@ -127,6 +127,7 @@ class StorageClientUserSerializer(rest_serializers.HyperlinkedModelSerializer):
 class ClientUserSerializer(rest_serializers.ModelSerializer):
     storage = StorageClientUserSerializer(source='*')
     admin = rest_serializers.BooleanField()
+    password = rest_serializers.CharField(required=False)
 
     class Meta:
         model = ClientUser
@@ -134,11 +135,11 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Usage is random but not more than limit
-        usage = randint(0, validated_data['limit'])
+        if 'usage' not in validated_data:
+            validated_data['usage'] = randint(0, validated_data['limit'])
         username = get_app_username(self.initial_data['application_id'], validated_data['email'])
-        user = User.objects.create_user(username=username,
-                                        password=validated_data['password'])
-        return ClientUser.objects.create(usage=usage, owner=user,
+        user = User.objects.create_user(username=username)
+        return ClientUser.objects.create(owner=user,
                                          client=self.initial_data['client'], **validated_data)
 
 

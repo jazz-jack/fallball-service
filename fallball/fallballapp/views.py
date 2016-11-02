@@ -33,7 +33,7 @@ from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_toke
 
 
 class Description(APIView):
-    def get(self, request, format=None):
+    def get(self, *args, **kwargs):
         env = pkg_resources.Environment()
         res = env._distmap.get('fallball', [None])[0]
         version = res.version if res else ''
@@ -237,6 +237,8 @@ class ClientUserViewSet(ModelViewSet):
             request.data['application_id'] = reseller.application.id
             if 'admin' not in request.data:
                 request.data['admin'] = False
+            if 'password' in request.data:
+                request.data.pop('password')
 
             return ModelViewSet.create(self, *args, **kwargs)
 
