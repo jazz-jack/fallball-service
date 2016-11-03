@@ -81,7 +81,6 @@ class ResellerViewSet(ModelViewSet):
         Reseller.objects.filter(name=kwargs['name'],
                                 application=kwargs['application']).delete()
         username = get_app_username(kwargs['name'], kwargs['application'])
-        User.objects.filter(username=username).delete()
         return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request, *args, **kwargs):
@@ -248,8 +247,6 @@ class ClientUserViewSet(ModelViewSet):
     def destroy(self, *args, **kwargs):
         client_user = get_object_or_404(ClientUser, email=kwargs['email'], client=kwargs['client'])
         client_user.delete()
-        User.objects.filter(username='{}.{}'.format(kwargs['reseller'].application.id,
-                                                    kwargs['email'])).delete()
         return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
 
     @get_user_context
