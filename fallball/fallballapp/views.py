@@ -255,7 +255,7 @@ class ClientUserViewSet(ModelViewSet):
         return Response(serializer.data)
 
     @get_user_context
-    def retrieve(self,  *args, **kwargs):
+    def retrieve(self, *args, **kwargs):
         queryset = ClientUser.objects.filter(client=kwargs['client'], email=kwargs['email'])
         if not queryset:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
