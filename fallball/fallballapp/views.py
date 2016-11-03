@@ -255,7 +255,7 @@ class ClientUserViewSet(ModelViewSet):
         return Response(serializer.data)
 
     @get_user_context
-    def retrieve(self, *args, **kwargs):
+    def retrieve(self,  *args, **kwargs):
         queryset = ClientUser.objects.filter(client=kwargs['client'], email=kwargs['email'])
         if not queryset:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
@@ -291,7 +291,8 @@ class ClientUserViewSet(ModelViewSet):
             client_user.password = request.data['password']
             client_user.usage = request.data['storage']['usage']
             if 'admin' in request.data:
-                client_user.admin = True
+                if request.data['admin'] is True:
+                    client_user.admin = True
             client_user.limit = request.data['storage']['limit']
 
             user.save()
