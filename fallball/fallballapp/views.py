@@ -80,7 +80,6 @@ class ResellerViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         Reseller.objects.filter(name=kwargs['name'],
                                 application=kwargs['application']).delete()
-        username = get_app_username(kwargs['name'], kwargs['application'])
         return Response('Reseller has been deleted', status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request, *args, **kwargs):
