@@ -106,7 +106,7 @@ def get_user_context(f):
             application = reseller.application
 
         if not reseller:
-            return Response("Such reseller is not found", status=status.HTTP_404_NOT_FOUND)
+            return Response("Such reseller is not found", status=HTTP_404_NOT_FOUND)
 
         client = Client.objects.filter(reseller=reseller, name=kwargs['client_name']).first()
 
