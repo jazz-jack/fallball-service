@@ -28,17 +28,19 @@ Fallball solution is a test service, which provides you with such functionality 
                 "name": "reseller_a", 
                 "clients_amount": 25,
                 "token": "35b77ce0-502f-11e4-9b31-25bca9fc0b20"
-                "storage": { 
-                    "usage": "250", 
+                "rid": "a66c2dd0-048d-452d-bbd7-50e78ff66e5d"
+                "storage": {
+                    "usage": "250",
                     "limit": 800
                 }
             },
             {
-                "name": "reseller_b", 
-                "clients_amount": 20, 
+                "name": "reseller_b",
+                "clients_amount": 20,
+                "rid": "a66c2dd0-048d-452d-bbd7-50e78ff66e5e"
                 "token": "2dd5975f6d9c3199f702540925ba79572f6bf3e6",
-                "storage": { 
-                    "usage": "203", 
+                "storage": {
+                    "usage": "203",
                     "limit": 500
                 }
             }
@@ -49,7 +51,8 @@ Fallball solution is a test service, which provides you with such functionality 
 + Request (application/json)
 
         {
-            "name": "reseller_a", 
+            "name": "reseller_a",
+            "rid": "a66c2dd0-048d-452d-bbd7-50e78ff66e5d",
             "storage": {
                 "limit": 800
             }
@@ -59,43 +62,33 @@ Fallball solution is a test service, which provides you with such functionality 
 + Response 200 (application/json)
 
         {
-            "name": "reseller_a", 
+            "name": "reseller_a",
             "clients_amount": 0,
+            "rid": "a66c2dd0-048d-452d-bbd7-50e78ff66e5d",
             "token": "2dd5975f6d9c3199f702540925ba79572f6bf3e6",
-            "storage": { 
-                    "usage": 0, 
+            "storage": {
+                    "usage": 0,
                     "limit": 800
             }
         }
 
-## Reset Resellers to Initial State Collection [/v1/resellers/reset_all/]
-
-### Reset Resellers [GET]
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "result": "true", 
-            }
-        ]
-
 ## Reseller collection [/v1/reseller/{reseller_name}/]
-        
+
 ### Get Reseller Information [GET]
 
 + Response 200 (application/json)
 
         {
-            "name": "reseller_a", 
+            "name": "reseller_a",
+            "rid": "a66c2dd0-048d-452d-bbd7-50e78ff66e5d",
             "token": "35b77ce0-502f-11e4-9b31-25bca9fc0b20",
-            "clients_amount": 25, 
-            "storage": { 
-                    "usage": 250, 
+            "clients_amount": 25,
+            "storage": {
+                    "usage": 250,
                     "limit": 800
             }
         }
-    
+
 ### Delete Reseller [DELETE]
 
 + Response 204
@@ -108,7 +101,7 @@ Fallball solution is a test service, which provides you with such functionality 
 
         [
             {
-                "result": "true", 
+                "result": "true",
             }
         ]
 
@@ -122,20 +115,21 @@ Fallball solution is a test service, which provides you with such functionality 
             {
                 "name": "client_a",
                 "creation_date": "2016-03-22T06:12:27+00:00",
-                "users_amount": 12, 
-                "storage": { 
-                    "usage": 250, 
+                "is_integrated": true,
+                "users_amount": 12,
+                "storage": {
+                    "usage": 250,
                     "limit": 800
                 }
             }
         ]
-    
+
 ### Create New Client [POST]
-    
+
 + Request (application/json)
 
         {
-            "name": "client_a", 
+            "name": "client_a",
             "storage": {
                 "limit": 200
             }
@@ -146,10 +140,11 @@ Fallball solution is a test service, which provides you with such functionality 
 
         {
             "name": "client_a",
+            "is_integrated": false,
             "creation_date": "2016-03-22T06:12:27+00:00",
             "users_amount": 0,
-            "storage": { 
-                    "usage": 250, 
+            "storage": {
+                    "usage": 250,
                     "limit": 800
             }
         }
@@ -157,18 +152,6 @@ Fallball solution is a test service, which provides you with such functionality 
 ### Delete Client [DELETE]
 
 + Response 204
-
-## Reset Clients to Initial State Collection [/v1/resellers/{reseller_name}/clients/reset_all/]
-
-### Reset Client [GET]
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "result": "true", 
-            }
-        ]
 
 ## Client Collection [/v1/resellers/{reseller_name}/clients/{client_name}/]
 
@@ -179,30 +162,19 @@ Fallball solution is a test service, which provides you with such functionality 
         {
             "name": "client_a",
             "creation_date": "2016-03-22T06:12:27+00:00",
-            "users_amount": 12, 
-            "storage": { 
-                    "usage": 250, 
+            "is_integrated": false,
+            "users_amount": 12,
+            "storage": {
+                    "usage": 250,
                     "limit": 800
             }
         }
 
 
-    
+
 ### Delete Client [DELETE]
 
 + Response 204
-
-## Reset Client to Initial State Collection [/v1/resellers/{reseller_name}/clients/{client_name}/reset/]
-
-### Reset Client [GET]
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "result": "true", 
-            }
-        ]
 
 ## Users Collection [/v1/resellers/{reseller_name}/clients/{client_name}/users/]
 
@@ -214,22 +186,21 @@ Fallball solution is a test service, which provides you with such functionality 
             {
                 "email": "john@company.com",
                 "password": "D7H3kj8",
-                "admin": true, 
-                "storage": { 
-                    "usage": 15, 
+                "admin": true,
+                "storage": {
+                    "usage": 15,
                     "limit": 32
                 }
             }
         ]
 
-    
+
 ### Create New User [POST]
 
 + Request (application/json)
 
         {
-            "email": "john@company.com", 
-            "password": "D7H3kj8",
+            "email": "john@company.com",
             "admin": true
             "storage": {
                 "limit": 200
@@ -241,7 +212,7 @@ Fallball solution is a test service, which provides you with such functionality 
 
         {
             "email": "john@company.com",
-            "password": "D7H3kj8",
+            "password": "",
             "admin": true, 
             "storage": { 
                     "usage": "15", 
