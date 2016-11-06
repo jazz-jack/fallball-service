@@ -94,17 +94,19 @@ def get_user_context(f):
             reseller = Reseller.objects.filter(name=kwargs['reseller_name'],
                                                owner=request.user).first()
             if not reseller:
-                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
-                if not admin:
-                    return Response("Client does not exist", status=HTTP_404_NOT_FOUND)
-                if not admin.client.name == kwargs['client_name']:
+                client_user = get_object_or_404(ClientUser, owner=request.user)
+                if client_user.admin is True or f.__name__ in ('retrieve', 'update'):
+                    reseller = client_user.client.reseller
+                else:
                     return Response("Authorization failed", status=HTTP_403_FORBIDDEN)
-                reseller = admin.client.reseller
+
+                if not client_user.client.name == kwargs['client_name']:
+                    return Response("Authorization failed", status=HTTP_403_FORBIDDEN)
 
             application = reseller.application
 
         if not reseller:
-            return Response("Such reseller is not found", status=status.HTTP_404_NOT_FOUND)
+            return Response("Such reseller is not found", status=HTTP_404_NOT_FOUND)
 
         client = Client.objects.filter(reseller=reseller, name=kwargs['client_name']).first()
 

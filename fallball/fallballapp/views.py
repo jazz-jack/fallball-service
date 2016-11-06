@@ -290,9 +290,9 @@ class ClientUserViewSet(ModelViewSet):
                                             email=kwargs['email'])
             client_user.password = request.data['password']
             client_user.usage = request.data['storage']['usage']
-            if 'admin' in request.data:
-                client_user.admin = True
             client_user.limit = request.data['storage']['limit']
+            if 'admin' in request.data:
+                client_user.admin = request.data['admin']
 
             user.save()
             client_user.save()
