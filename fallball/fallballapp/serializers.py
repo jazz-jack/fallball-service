@@ -151,7 +151,7 @@ class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
 
     class Meta:
         model = ClientUser
-        fields = ('email', 'storage', 'admin', 'company', 'token')
+        fields = ('email', 'password', 'storage', 'admin', 'company', 'token')
 
     def get_company(self, obj):
         return obj.client.name
