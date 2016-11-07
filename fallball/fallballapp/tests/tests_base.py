@@ -339,11 +339,17 @@ class BaseTestCase(TestCase):
 
         self.assertEqual(resp.status_code, 200)
 
-        # storage and password are optional
+        # storage and password are optional, if value not specified existing one is used
+        user_before = ClientUser.objects.get(id=user.id)
         resp = request.put(url, json.dumps({'email': user.email}),
                            content_type='application/json')
+        user_after = ClientUser.objects.get(id=user.id)
 
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(user_before.password, user_after.password)
+        self.assertEqual(user_before.limit, user_after.limit)
+        self.assertEqual(user_before.usage, user_after.usage)
+        self.assertEqual(user_before.admin, user_after.admin)
 
     def test_put_creation(self):
         admin = ClientUser.objects.filter(admin=True).first()
