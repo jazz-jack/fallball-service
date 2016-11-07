@@ -89,12 +89,12 @@ class ResellerViewSet(ModelViewSet):
         else:
             resellers = Reseller.objects.filter(owner=request.user)
             if not resellers:
-                admin = ClientUser.objects.filter(owner=request.user, admin=True).first()
-                if not admin:
+                client_user = ClientUser.objects.filter(owner=request.user).first()
+                if not client_user:
                     return Response("Resellers do not exist for such account",
                                     status=HTTP_404_NOT_FOUND)
 
-                queryset = [admin.client.reseller, ]
+                queryset = [client_user.client.reseller, ]
                 serializer = ResellerNameSerializer(queryset, many=True)
                 return Response(serializer.data)
 
