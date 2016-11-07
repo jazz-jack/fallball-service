@@ -272,37 +272,36 @@ class ClientUserViewSet(ModelViewSet):
             return self.create(*args, **kwargs)
 
         request = args[0]
-        if (all(field in request.data for field in ('password', 'storage')) and
-                all(field in request.data['storage'] for field in ('usage', 'limit'))):
 
-            limit = request.data['storage']['limit']
-            usage = request.data['storage']['usage']
-
-            space = free_space(kwargs['client'])
-            if space < limit or usage > limit:
-                return Response("Storage limit is reached", HTTP_400_BAD_REQUEST)
-
+        if 'password' in request.data:
             user = get_object_or_404(User, username=get_app_username(kwargs['application'],
                                                                      kwargs['email']))
             user.set_password(request.data['password'])
-
-            client_user = get_object_or_404(ClientUser, client=kwargs['client'],
-                                            email=kwargs['email'])
-            client_user.password = request.data['password']
-            client_user.usage = request.data['storage']['usage']
-            client_user.limit = request.data['storage']['limit']
-            if 'admin' in request.data:
-                client_user.admin = request.data['admin']
-
             user.save()
-            client_user.save()
+            client_user.password = request.data['password']
 
-            queryset = [client_user, ]
-            serializer = ClientUserSerializer(queryset, many=True)
+        if 'storage' in request.data:
+            limit = request.data['storage'].get('limit')
+            usage = request.data['storage'].get('usage')
 
-            return Response(serializer.data[0], status=status.HTTP_200_OK)
+            if limit is not None:
+                client_user.limit = limit
+            if usage is not None:
+                client_user.usage = usage
 
-        return Response("Wrong parameters", HTTP_400_BAD_REQUEST)
+            space = free_space(kwargs['client'])
+            if space < client_user.limit or client_user.usage > client_user.limit:
+                return Response("Storage limit is reached", HTTP_400_BAD_REQUEST)
+
+        if 'admin' in request.data:
+            client_user.admin = request.data['admin']
+
+        client_user.save()
+
+        queryset = [client_user, ]
+        serializer = ClientUserSerializer(queryset, many=True)
+
+        return Response(serializer.data[0], status=status.HTTP_200_OK)
 
     @detail_route(methods=['get'])
     def token(self, request, **kwargs):
