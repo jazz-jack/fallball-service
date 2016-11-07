@@ -339,6 +339,12 @@ class BaseTestCase(TestCase):
 
         self.assertEqual(resp.status_code, 200)
 
+        # storage and password are optional
+        resp = request.put(url, json.dumps({'email': user.email}),
+                           content_type='application/json')
+
+        self.assertEqual(resp.status_code, 200)
+
     def test_put_creation(self):
         admin = ClientUser.objects.filter(admin=True).first()
         request = _get_client(admin.owner)
