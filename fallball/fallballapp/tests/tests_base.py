@@ -251,7 +251,7 @@ class BaseTestCase(TestCase):
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
         user_request = _get_client(not_admin.owner)
         code = user_request.get(url).status_code
-        self.assertEqual(code, 404)
+        self.assertEqual(code, 200)
 
     def test_user_mgmt_under_admin(self):
         admin = ClientUser.objects.filter(admin=True).first()
