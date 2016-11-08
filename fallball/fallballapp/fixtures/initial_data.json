@@ -348,5 +348,30 @@
       "user": 1,
       "created": "2016-09-15T12:03:45.681Z"
     }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-03T14:04:26.620Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "fallballapp.application",
+    "pk": "new_app",
+    "fields": {
+      "owner": 2
+    }
   }
 ]
