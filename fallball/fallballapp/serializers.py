@@ -106,7 +106,8 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('name', 'creation_date', 'users_amount', 'users_by_type', 'storage', 'is_integrated')
+        fields = (
+            'name', 'creation_date', 'users_amount', 'users_by_type', 'storage', 'is_integrated')
 
     def create(self, validated_data):
         """
@@ -132,7 +133,8 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
     storage = StorageClientUserSerializer(source='*')
     admin = rest_serializers.BooleanField()
     password = rest_serializers.CharField(required=False)
-    profile_type = rest_serializers.ChoiceField(choices=ClientUser.USER_PROFILE_TYPES)
+    profile_type = rest_serializers.ChoiceField(choices=ClientUser.USER_PROFILE_TYPES,
+                                                required=False)
 
     class Meta:
         model = ClientUser
