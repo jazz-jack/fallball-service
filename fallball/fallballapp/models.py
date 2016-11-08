@@ -71,8 +71,21 @@ class Client(models.Model):
         """
         return ClientUser.objects.filter(client=self).count()
 
+    def get_users_by_type(self):
+        """
+        Calculate number of users of each type for company
+        """
+        return {k: ClientUser.objects.filter(client=self, profile_type=k).count() for k in
+                dict(ClientUser.USER_PROFILE_TYPES)}
+
 
 class ClientUser(models.Model):
+    DEFAULT_PROFILE = 'default'
+    GOLD_PROFILE = 'gold'
+    USER_PROFILE_TYPES = (
+        (DEFAULT_PROFILE, 'Default'),
+        (GOLD_PROFILE, 'Gold'),
+    )
     email = models.EmailField()
     owner = models.OneToOneField(User)
     password = models.CharField(max_length=12, blank=True)
@@ -80,6 +93,8 @@ class ClientUser(models.Model):
     admin = models.BooleanField(default=False)
     limit = models.IntegerField()
     client = models.ForeignKey(Client)
+    profile_type = models.CharField(max_length=12, choices=USER_PROFILE_TYPES,
+                                    default=DEFAULT_PROFILE)
 
     class Meta:
         unique_together = ('client', 'email')
