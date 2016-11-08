@@ -13,7 +13,7 @@ class Application(models.Model):
 
 class Reseller(models.Model):
     name = models.CharField(max_length=120)
-    rid = models.CharField("Reseller ID", max_length=120, unique=True)
+    rid = models.CharField("Reseller ID", max_length=120)
     application = models.ForeignKey(Application)
     limit = models.IntegerField()
     # owner property is a foreign key related to User instance
