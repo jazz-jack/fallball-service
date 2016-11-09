@@ -22,8 +22,7 @@ class RequestLogMiddleware(object):
             try:
                 self.log['request']['body'] = json.loads(request.body.decode())
             except ValueError:
-                body = {"message": "body is not valid json"}
-                self.log['request']['body'] = body
+                self.log['request']['body'] = {"message": "body is not valid json"}
 
     def process_response(self, request, response):
         if not hasattr(request, 'user'):
