@@ -19,7 +19,11 @@ class RequestLogMiddleware(object):
         request.start_time = time.time()
 
         if request.body:
-            self.log['request']['body'] = json.loads(request.body.decode())
+            try:
+                self.log['request']['body'] = json.loads(request.body.decode())
+            except ValueError:
+                body = json.loads(json.dumps({'message': 'body is not valid json'}))
+                self.log['request']['body'] = body
 
     def process_response(self, request, response):
         if not hasattr(request, 'user'):
