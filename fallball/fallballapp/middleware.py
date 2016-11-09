@@ -23,9 +23,6 @@ class RequestLogMiddleware(object):
 
         log = {'request': {}, 'response': {}}
 
-        if request.body:
-            log['request']['body'] = json.loads(request.body.decode('utf-8'))
-
         if response.content and response['content-type'] == 'application/json':
             log['response']['body'] = json.loads(response.content.decode('utf-8'))
 
