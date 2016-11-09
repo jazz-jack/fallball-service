@@ -373,5 +373,230 @@
     "fields": {
       "owner": 2
     }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$e9KaOxR4R9s1$maz09dK6MjEzZCGGNrplpVYTb1G5U7Z59Wun+tyEKQ0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app.reseller_a",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-07T10:10:55.698Z",
+      "groups": [
+      ],
+      "user_permissions": [
+      ]
+    }
+  },
+  {
+    "model": "fallballapp.reseller",
+    "pk": 1,
+    "fields": {
+      "name": "reseller_a",
+      "rid": "32f57666-6e78-4080-b1c0-43111d2b5af8",
+      "application": "new_app",
+      "limit": 300,
+      "owner": 3
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$e9KaOxR4R9s1$maz09dK6MjEzZCGGNrplpVYTb1G5U7Z59Wun+tyEKQ0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app.reseller_b",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-07T10:10:55.707Z",
+      "groups": [
+      ],
+      "user_permissions": [
+      ]
+    }
+  },
+  {
+    "model": "fallballapp.reseller",
+    "pk": 2,
+    "fields": {
+      "name": "reseller_b",
+      "rid": "f0e75b19-e668-48ef-92c5-af309faf3735",
+      "application": "new_app",
+      "limit": 350,
+      "owner": 7
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 8,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$e9KaOxR4R9s1$maz09dK6MjEzZCGGNrplpVYTb1G5U7Z59Wun+tyEKQ0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app.reseller_c",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-07T10:10:55.709Z",
+      "groups": [
+      ],
+      "user_permissions": [
+      ]
+    }
+  },
+  {
+    "model": "fallballapp.reseller",
+    "pk": 3,
+    "fields": {
+      "name": "reseller_c",
+      "rid": "40a230cd-e2cb-4176-b384-05a185ed1028",
+      "application": "new_app",
+      "limit": 400,
+      "owner": 8
+    }
+  },
+  {
+    "model": "fallballapp.client",
+    "pk": 1,
+    "fields": {
+      "name": "MadRobots",
+      "is_integrated": false,
+      "creation_date": "2016-11-07T10:10:55.700Z",
+      "limit": 40,
+      "reseller": 1
+    }
+  },
+  {
+    "model": "fallballapp.client",
+    "pk": 2,
+    "fields": {
+      "name": "MyDevs",
+      "is_integrated": false,
+      "creation_date": "2016-11-07T10:10:55.700Z",
+      "limit": 30,
+      "reseller": 1
+    }
+  },
+  {
+    "model": "fallballapp.client",
+    "pk": 3,
+    "fields": {
+      "name": "SunnyFlowers",
+      "is_integrated": false,
+      "creation_date": "2016-11-07T10:10:55.700Z",
+      "limit": 50,
+      "reseller": 1
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$e9KaOxR4R9s1$maz09dK6MjEzZCGGNrplpVYTb1G5U7Z59Wun+tyEKQ0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app.johnson@sunnyflowers.tld",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-07T10:10:55.701Z",
+      "groups": [
+      ],
+      "user_permissions": [
+      ]
+    }
+  },
+  {
+    "model": "fallballapp.clientuser",
+    "pk": 1,
+    "fields": {
+      "email": "johnson@sunnyflowers.tld",
+      "owner": 4,
+      "password": "",
+      "usage": 3,
+      "admin": false,
+      "limit": 5,
+      "client": 3
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$e9KaOxR4R9s1$maz09dK6MjEzZCGGNrplpVYTb1G5U7Z59Wun+tyEKQ0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app.brown@sunnyflowers.tld",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-07T10:10:55.702Z",
+      "groups": [
+      ],
+      "user_permissions": [
+      ]
+    }
+  },
+  {
+    "model": "fallballapp.clientuser",
+    "pk": 2,
+    "fields": {
+      "email": "brown@sunnyflowers.tld",
+      "owner": 5,
+      "password": "",
+      "usage": 2,
+      "admin": false,
+      "limit": 6,
+      "client": 3
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$e9KaOxR4R9s1$maz09dK6MjEzZCGGNrplpVYTb1G5U7Z59Wun+tyEKQ0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "new_app.williams@sunnyflowers.tld",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2016-11-07T10:10:55.704Z",
+      "groups": [
+      ],
+      "user_permissions": [
+      ]
+    }
+  },
+  {
+    "model": "fallballapp.clientuser",
+    "pk": 3,
+    "fields": {
+      "email": "williams@sunnyflowers.tld",
+      "owner": 6,
+      "password": "",
+      "usage": 1,
+      "admin": true,
+      "limit": 4,
+      "client": 3
+    }
   }
 ]
