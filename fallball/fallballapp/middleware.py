@@ -22,7 +22,7 @@ class RequestLogMiddleware(object):
             try:
                 self.log['request']['body'] = json.loads(request.body.decode())
             except ValueError:
-                body = json.loads(json.dumps({'message': 'body is not valid json'}))
+                body = {"message": "body is not valid json"}
                 self.log['request']['body'] = body
 
     def process_response(self, request, response):
