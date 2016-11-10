@@ -11,8 +11,18 @@ logger = logging.getLogger('info_logger')
 
 
 class RequestLogMiddleware(object):
+
+    def __init__(self):
+        self.log = {'request': {}, 'response': {}}
+
     def process_request(self, request):
         request.start_time = time.time()
+
+        if request.body:
+            try:
+                self.log['request']['body'] = json.loads(request.body.decode())
+            except ValueError:
+                self.log['request']['body'] = {"message": "body is not valid json"}
 
     def process_response(self, request, response):
         if not hasattr(request, 'user'):
@@ -21,18 +31,16 @@ class RequestLogMiddleware(object):
         app_id = None
         reseller_name = None
 
-        log = {'request': {}, 'response': {}}
-
         if response.content and response['content-type'] == 'application/json':
-            log['response']['body'] = json.loads(response.content.decode('utf-8'))
+            self.log['response']['body'] = json.loads(response.content.decode())
 
-        log['request']['headers'] = {
+        self.log['request']['headers'] = {
             'REQUEST_METHOD': request.META['REQUEST_METHOD'],
         }
         if 'CONTENT_TYPE' in request.META:
-            log['request']['headers']['CONTENT_TYPE'] = request.META['CONTENT_TYPE'],
+            self.log['request']['headers']['CONTENT_TYPE'] = request.META['CONTENT_TYPE'],
 
-        log['response']['headers'] = response._headers
+        self.log['response']['headers'] = response._headers
 
         if not request.user.is_anonymous and not request.user.is_superuser:
 
@@ -46,10 +54,10 @@ class RequestLogMiddleware(object):
                     reseller_name = request.resolver_match.kwargs['reseller_name']
 
             if app_id:
-                log['response'] = {'app': app_id, }
+                self.log['response'] = {'app': app_id, }
             if reseller_name:
-                log['reseller'] = reseller_name
+                self.log['reseller'] = reseller_name
 
-        logger.info(json.dumps(log))
+        logger.info(json.dumps(self.log))
 
         return response
