@@ -115,4 +115,13 @@ def get_user_context(f):
 
 
 def free_space(owner):
-    return owner.limit - owner.get_usage()
+    if owner.limit is not -1:
+        return owner.limit - owner.get_usage()
+    elif isinstance(owner, Reseller):
+        return -1
+    elif isinstance(owner, Client):
+        if owner.reseller.limit is -1:
+            return -1
+        else:
+            return owner.reseller.limit
+    return None

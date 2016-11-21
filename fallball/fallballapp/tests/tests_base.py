@@ -163,6 +163,60 @@ class BaseTestCase(TestCase):
 
         self.assertFalse(Client.objects.filter(name='new_client2'))
 
+    def test_unlimited_storage(self):
+        app = Application.objects.all().first()
+        client_request = _get_client(app.owner.id)
+
+        # Test unlimited client created under unlimited reseller
+        url = reverse('v1:resellers-list')
+        res_code = client_request.post(url,
+                                       json.dumps({'name': 'unlimited_res',
+                                                   'storage': {'limit': -1},
+                                                   'rid': '6F9619FF-8B86-D011-B42D-00CF4FC964FF'}),
+                                       content_type='application/json').status_code
+        self.assertEqual(res_code, 201)
+
+        url = reverse('v1:clients-list', kwargs={'reseller_name': 'unlimited_res'})
+        client_code = client_request.post(url, json.dumps({'name': 'unlimited_client',
+                                                           'storage': {'limit': -1}}),
+                                          content_type='application/json').status_code
+        self.assertEqual(client_code, 201)
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': 'unlimited_res',
+                                               'client_name': 'unlimited_client'})
+        user_code = client_request.post(url, json.dumps({'email': 'email@domain.tld',
+                                                         'storage': {'limit': 9000000}}),
+                                        content_type='application/json').status_code
+        self.assertEqual(user_code, 201)
+
+        # Test unlimited client created under limited reseller
+        url = reverse('v1:resellers-list')
+        res_code = client_request.post(url,
+                                       json.dumps({'name': 'limited_res',
+                                                   'storage': {'limit': 300},
+                                                   'rid': '7F9619FF-8B86-D011-B42D-00CF4FC964FF'}),
+                                       content_type='application/json').status_code
+        self.assertEqual(res_code, 201)
+
+        url = reverse('v1:clients-list', kwargs={'reseller_name': 'limited_res'})
+        client_code = client_request.post(url, json.dumps({'name': 'unlimited_client_2',
+                                                           'storage': {'limit': -1}}),
+                                          content_type='application/json').status_code
+        self.assertEqual(client_code, 201)
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': 'limited_res',
+                                               'client_name': 'unlimited_client_2'})
+
+        user_code = client_request.post(url, json.dumps({'email': 'email2@domain.tld',
+                                                         'storage': {'limit': 9000000}}),
+                                        content_type='application/json').status_code
+        self.assertEqual(user_code, 400)
+
+        user_code = client_request.post(url, json.dumps({'email': 'email3@domain.tld',
+                                                         'storage': {'limit': 9}}),
+                                        content_type='application/json').status_code
+        self.assertEqual(user_code, 201)
+
     def test_not_found_objects(self):
         app = Application.objects.all().first()
         client_request = _get_client(app.owner.id)
