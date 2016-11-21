@@ -120,8 +120,5 @@ def free_space(owner):
     elif isinstance(owner, Reseller):
         return UNLIMITED
     elif isinstance(owner, Client):
-        if owner.reseller.limit is UNLIMITED:
-            return UNLIMITED
-        else:
-            return owner.reseller.limit
+        return free_space(owner.reseller)
     return None
