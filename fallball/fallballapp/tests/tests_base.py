@@ -6,6 +6,7 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from fallballapp import UNLIMITED
 from fallballapp.models import Application, Reseller, Client, ClientUser
 
 
@@ -171,14 +172,14 @@ class BaseTestCase(TestCase):
         url = reverse('v1:resellers-list')
         res_code = client_request.post(url,
                                        json.dumps({'name': 'unlimited_res',
-                                                   'storage': {'limit': -1},
+                                                   'storage': {'limit': UNLIMITED},
                                                    'rid': '6F9619FF-8B86-D011-B42D-00CF4FC964FF'}),
                                        content_type='application/json').status_code
         self.assertEqual(res_code, 201)
 
         url = reverse('v1:clients-list', kwargs={'reseller_name': 'unlimited_res'})
         client_code = client_request.post(url, json.dumps({'name': 'unlimited_client',
-                                                           'storage': {'limit': -1}}),
+                                                           'storage': {'limit': UNLIMITED}}),
                                           content_type='application/json').status_code
         self.assertEqual(client_code, 201)
 
@@ -200,7 +201,7 @@ class BaseTestCase(TestCase):
 
         url = reverse('v1:clients-list', kwargs={'reseller_name': 'limited_res'})
         client_code = client_request.post(url, json.dumps({'name': 'unlimited_client_2',
-                                                           'storage': {'limit': -1}}),
+                                                           'storage': {'limit': UNLIMITED}}),
                                           content_type='application/json').status_code
         self.assertEqual(client_code, 201)
 

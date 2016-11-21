@@ -6,6 +6,7 @@ from rest_framework_jwt.settings import api_settings
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.response import Response
 
+from fallballapp import UNLIMITED
 from fallballapp.models import Application, Reseller, Client, ClientUser
 
 
@@ -115,13 +116,13 @@ def get_user_context(f):
 
 
 def free_space(owner):
-    if owner.limit is not -1:
+    if owner.limit is not UNLIMITED:
         return owner.limit - owner.get_usage()
     elif isinstance(owner, Reseller):
-        return -1
+        return UNLIMITED
     elif isinstance(owner, Client):
-        if owner.reseller.limit is -1:
-            return -1
+        if owner.reseller.limit is UNLIMITED:
+            return UNLIMITED
         else:
             return owner.reseller.limit
     return None
