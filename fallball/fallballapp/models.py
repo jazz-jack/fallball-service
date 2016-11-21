@@ -3,6 +3,9 @@ from django.db import models
 from django.db.models import Sum
 
 
+UNLIMITED = -1
+
+
 class Application(models.Model):
     id = models.CharField(max_length=150, primary_key=True)
     owner = models.OneToOneField(User)

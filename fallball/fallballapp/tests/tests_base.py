@@ -6,8 +6,7 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from fallballapp import UNLIMITED
-from fallballapp.models import Application, Reseller, Client, ClientUser
+from fallballapp.models import Application, Reseller, Client, ClientUser, UNLIMITED
 
 
 def _get_client(user_id, accept='application/json'):

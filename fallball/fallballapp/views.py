@@ -21,9 +21,8 @@ except ImportError:
     import urlparse
     from urllib import urlencode
 
-from fallballapp import UNLIMITED
 from fallballapp.middleware import logger
-from fallballapp.models import Application, Client, ClientUser, Reseller
+from fallballapp.models import Application, Client, ClientUser, Reseller, UNLIMITED
 from fallballapp.renderers import PlainTextRenderer
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,

@@ -6,8 +6,7 @@ from rest_framework_jwt.settings import api_settings
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.response import Response
 
-from fallballapp import UNLIMITED
-from fallballapp.models import Application, Reseller, Client, ClientUser
+from fallballapp.models import Application, Reseller, Client, ClientUser, UNLIMITED
 
 
 def get_object_or_403(*args, **kwargs):
