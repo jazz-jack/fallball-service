@@ -22,8 +22,7 @@ except ImportError:
     from urllib import urlencode
 
 from fallballapp.middleware import logger
-
-from fallballapp.models import Application, Client, ClientUser, Reseller
+from fallballapp.models import Application, Client, ClientUser, Reseller, UNLIMITED
 from fallballapp.renderers import PlainTextRenderer
 from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
                                      ClientUserSerializer, ResellerSerializer,
@@ -138,9 +137,10 @@ class ClientViewSet(ModelViewSet):
                                          owner=request.user)
         if not Client.objects.filter(reseller=reseller,
                                      name=request.data['name']):
-            # Check if there is a free space for new client
-            free_space = reseller.limit - reseller.get_usage()
-            if free_space >= request.data['storage']['limit']:
+
+            # Check if there is a free space for new client or storage is unlimited
+            space = free_space(reseller)
+            if space >= request.data['storage']['limit'] or reseller.limit is UNLIMITED:
                 # Every client should belong to particular reseller
                 request.data['reseller'] = reseller
                 return ModelViewSet.create(self, request, *args, **kwargs)
@@ -228,9 +228,9 @@ class ClientUserViewSet(ModelViewSet):
         if 'usage' in request.data:
             return Response("Usage should not be specified", status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if client has free space for new user
+        # Check if client has free space for new user or storage is unlimited
         space = free_space(client)
-        if space >= request.data['storage']['limit']:
+        if space >= request.data['storage']['limit'] or space is UNLIMITED:
             request.data['client'] = client
             request.data['application_id'] = reseller.application.id
             if 'admin' not in request.data:

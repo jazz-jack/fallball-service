@@ -6,7 +6,7 @@ from rest_framework_jwt.settings import api_settings
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
 from rest_framework.response import Response
 
-from fallballapp.models import Application, Reseller, Client, ClientUser
+from fallballapp.models import Application, Reseller, Client, ClientUser, UNLIMITED
 
 
 def get_object_or_403(*args, **kwargs):
@@ -115,4 +115,10 @@ def get_user_context(f):
 
 
 def free_space(owner):
-    return owner.limit - owner.get_usage()
+    if owner.limit is not UNLIMITED:
+        return owner.limit - owner.get_usage()
+    elif isinstance(owner, Reseller):
+        return UNLIMITED
+    elif isinstance(owner, Client):
+        return free_space(owner.reseller)
+    return None
