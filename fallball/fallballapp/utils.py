@@ -115,8 +115,8 @@ def get_user_context(f):
 
 
 def free_space(owner):
-    if owner.limit is not UNLIMITED:
-        return owner.limit - owner.get_usage()
+    if int(owner.limit) is not UNLIMITED:
+        return int(owner.limit - owner.get_usage())
     elif isinstance(owner, Reseller):
         return UNLIMITED
     elif isinstance(owner, Client):
