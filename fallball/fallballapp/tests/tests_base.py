@@ -28,7 +28,10 @@ class BaseTestCase(TestCase):
     def setUp(self):
         admin = get_user_model().objects.filter(username='admin').first()
         if not admin:
-            admin = get_user_model().objects.create_superuser('admin', 'admin@fallball.io', '1q2w3e')
+            admin = get_user_model().objects.create_superuser(
+                'admin',
+                'admin@fallball.io',
+                '1q2w3e')
         client_request = _get_client(admin.id)
 
         # create_application

@@ -2,7 +2,7 @@ version: '2'
 services:
   fbdb:
     volumes:
-      - "/root/fbdbvolume:/var/lib/mysql"
+      - "./dbvolume:/var/lib/mysql"
     container_name: fbdb
     image: mariadb:latest
     env_file:
