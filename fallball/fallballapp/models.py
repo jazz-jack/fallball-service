@@ -1,14 +1,13 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum
-
+from django.conf import settings
 
 UNLIMITED = -1
 
 
 class Application(models.Model):
     id = models.CharField(max_length=150, primary_key=True)
-    owner = models.OneToOneField(User)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.id
@@ -21,7 +20,7 @@ class Reseller(models.Model):
     limit = models.IntegerField()
     # owner property is a foreign key related to User instance
     # It is needed to use token authorization
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     class Meta:
         unique_together = (('application', 'name'), ('application', 'rid'))
@@ -90,7 +89,7 @@ class ClientUser(models.Model):
         (GOLD_PROFILE, 'Gold'),
     )
     email = models.EmailField()
-    owner = models.OneToOneField(User)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     password = models.CharField(max_length=12, blank=True)
     usage = models.IntegerField(blank=True)
     admin = models.BooleanField(default=False)

@@ -1,7 +1,7 @@
 from random import randint
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers as rest_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
@@ -32,10 +32,10 @@ class ApplicationSerializer(AuthorizationSerializer):
         return 'https://{}/api/v1/'.format(settings.SERVICE_HOST)
 
     def create(self, validated_data):
-        if User.objects.filter(username=validated_data['id']).exists():
+        if get_user_model().objects.filter(username=validated_data['id']).exists():
             raise ValidationError('Application with such id is already created')
 
-        user = User.objects.create(username=validated_data['id'])
+        user = get_user_model().objects.create(username=validated_data['id'])
         return Application.objects.create(owner=user, **validated_data)
 
 
@@ -71,10 +71,10 @@ class ResellerSerializer(AuthorizationSerializer):
         username = '{application_id}.{reseller_name}'.format(application_id=application_id,
                                                              reseller_name=reseller_name)
 
-        if User.objects.filter(username=username).exists():
+        if get_user_model().objects.filter(username=username).exists():
             raise ValidationError('Reseller with such name is already created')
 
-        user = User.objects.create(username=username)
+        user = get_user_model().objects.create(username=username)
         return Reseller.objects.create(owner=user, application=self.initial_data['application'],
                                        **validated_data)
 
@@ -145,7 +145,7 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
         if 'usage' not in validated_data:
             validated_data['usage'] = randint(0, validated_data['limit'])
         username = get_app_username(self.initial_data['application_id'], validated_data['email'])
-        user = User.objects.create_user(username=username)
+        user = get_user_model().objects.create_user(username=username)
         return ClientUser.objects.create(owner=user,
                                          client=self.initial_data['client'], **validated_data)
 
