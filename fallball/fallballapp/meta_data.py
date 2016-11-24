@@ -67,6 +67,7 @@ def load_app_data(app_instance):
         owner = User.objects.create_user(username=username)
         params = dict.copy(reseller_template)
         params.pop('clients', None)
+
         reseller = Reseller.objects.create(application=app_instance, owner=owner,
                                            **params)
 

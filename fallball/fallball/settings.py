@@ -170,3 +170,5 @@ REST_FRAMEWORK = {
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
 }
+
+ADMIN_AUTH_TOKEN = 'd8cc06c05a6cd5d5b6156fd2eb963a6f1fdd039c'
