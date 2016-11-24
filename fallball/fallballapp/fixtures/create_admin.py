@@ -1,10 +1,6 @@
-import logging
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
-
-logger = logging.getLogger(__name__)
 
 
 def create_admin(apps, schema_editor):
