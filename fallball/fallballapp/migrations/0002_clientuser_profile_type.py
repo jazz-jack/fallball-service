@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+from fallballapp.fixtures.load_data import load_data
+
 
 class Migration(migrations.Migration):
 
@@ -17,4 +19,5 @@ class Migration(migrations.Migration):
             name='profile_type',
             field=models.CharField(choices=[(b'default', b'Default'), (b'gold', b'Gold')], default=b'default', max_length=12),
         ),
+        migrations.RunPython(load_data),
     ]

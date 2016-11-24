@@ -6,8 +6,6 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
-from fallballapp.fixtures.create_admin import create_admin
-
 
 class Migration(migrations.Migration):
 
@@ -76,5 +74,4 @@ class Migration(migrations.Migration):
             name='client',
             unique_together=set([('reseller', 'name')]),
         ),
-        migrations.RunPython(create_admin),
     ]
