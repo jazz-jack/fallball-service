@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from fallballapp.models import Reseller, Client, ClientUser
 from fallballapp.utils import get_app_username
@@ -64,11 +64,11 @@ data = [
 def load_app_data(app_instance):
     for reseller_template in data:
         username = get_app_username(app_instance.id, reseller_template['name'])
-        owner = User.objects.create_user(username=username)
+        owner = get_user_model().objects.create_user(username=username)
         params = dict.copy(reseller_template)
         params.pop('clients', None)
-        reseller = Reseller.objects.create(application=app_instance, owner=owner,
-                                           **params)
+
+        reseller = Reseller.objects.create(application=app_instance, owner=owner, **params)
 
         if 'clients' in reseller_template:
             for client_template in reseller_template['clients']:
@@ -79,7 +79,7 @@ def load_app_data(app_instance):
                 if 'users' in client_template:
                     for user_template in client_template['users']:
                         username = get_app_username(app_instance.id, user_template['email'])
-                        owner = User.objects.create_user(username=username)
+                        owner = get_user_model().objects.create_user(username=username)
                         params = dict.copy(user_template)
                         params.pop('users', None)
                         ClientUser.objects.create(client=client, owner=owner, **params)
