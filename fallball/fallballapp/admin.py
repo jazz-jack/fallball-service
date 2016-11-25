@@ -33,7 +33,11 @@ class ApplicationAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
     def token(self, obj):
-        return Token.objects.filter(user=obj.owner).first().key
+        token = Token.objects.filter(user=obj.owner).first()
+        if token:
+            return token.key
+        else:
+            return None
 
 
 class ClientInline(BaseInline):

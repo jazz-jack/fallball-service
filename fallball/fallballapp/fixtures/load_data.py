@@ -23,6 +23,10 @@ def load_data(apps, schema_editor):
         is_superuser=False,
         is_staff=False)
 
+    apps.get_model('authtoken', 'Token').objects.get_or_create(
+            user=user_app,
+            pk=binascii.hexlify(os.urandom(20)).decode())
+
     app, created = apps.get_model('fallballapp', 'Application').objects.get_or_create(
         pk='new_app',
         owner=user_app)
