@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -26,9 +26,12 @@ class BaseTestCase(TestCase):
     Test basic operations: model objects create/delete
     """
     def setUp(self):
-        admin = User.objects.filter(username='admin').first()
+        admin = get_user_model().objects.filter(username='admin').first()
         if not admin:
-            admin = User.objects.create_superuser('admin', 'admin@fallball.io', '1q2w3e')
+            admin = get_user_model().objects.create_superuser(
+                'admin',
+                'admin@fallball.io',
+                '1q2w3e')
         client_request = _get_client(admin.id)
 
         # create_application
@@ -126,7 +129,7 @@ class BaseTestCase(TestCase):
         self.assertFalse(request.status_code == 200)
 
     def test_two_applications(self):
-        admin = User.objects.filter(username='admin').first()
+        admin = get_user_model().objects.filter(username='admin').first()
         client_request = _get_client(admin.id)
 
         first_app_user = ClientUser.objects.filter().first()
@@ -424,7 +427,7 @@ class BaseTestCase(TestCase):
     def test_root_access(self):
         admin = ClientUser.objects.filter(admin=True).first()
 
-        root = User.objects.filter(is_superuser=True)
+        root = get_user_model().objects.filter(is_superuser=True)
         request = _get_client(root)
 
         url = reverse('v1:resellers-detail', kwargs={'name': admin.client.reseller.name, })

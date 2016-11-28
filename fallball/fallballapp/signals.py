@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-from fallballapp.models import Application, Reseller, ClientUser
+from fallballapp.models import Application, Reseller
 from fallballapp.meta_data import load_app_data
 
 
@@ -21,16 +21,6 @@ def load_fixtures(instance=None, created=False, **kwargs):
     load_app_data(instance)
 
 
-@receiver(post_delete, sender=Application)
-def delete_app_user(instance=None, **kwargs):
-    instance.owner.delete()
-
-
 @receiver(post_delete, sender=Reseller)
 def delete_reseller_user(instance=None, **kwargs):
-    instance.owner.delete()
-
-
-@receiver(post_delete, sender=ClientUser)
-def delete_client_user(instance=None, **kwargs):
     instance.owner.delete()

@@ -1,6 +1,6 @@
 import pkg_resources
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -277,8 +277,9 @@ class ClientUserViewSet(ModelViewSet):
         request = args[0]
 
         if 'password' in request.data:
-            user = get_object_or_404(User, username=get_app_username(kwargs['application'],
-                                                                     kwargs['email']))
+            user = get_object_or_404(get_user_model(),
+                                     username=get_app_username(kwargs['application'],
+                                                               kwargs['email']))
             user.set_password(request.data['password'])
             user.save()
             client_user.password = request.data['password']
