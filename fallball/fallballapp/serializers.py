@@ -29,7 +29,7 @@ class ApplicationSerializer(AuthorizationSerializer):
         fields = ('id', 'entrypoint', 'token')
 
     def get_entrypoint(self, obj):
-        return 'https://{}/api/v1/'.format(settings.SERVICE_HOST)
+        return 'https://{}/v1/'.format(settings.SERVICE_HOST)
 
     def create(self, validated_data):
         if get_user_model().objects.filter(username=validated_data['id']).exists():
