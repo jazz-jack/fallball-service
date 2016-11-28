@@ -7,7 +7,7 @@ UNLIMITED = -1
 
 class Application(models.Model):
     id = models.CharField(max_length=150, primary_key=True)
-    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL)
 
     def __str__(self):
         return self.id
@@ -89,7 +89,7 @@ class ClientUser(models.Model):
         (GOLD_PROFILE, 'Gold'),
     )
     email = models.EmailField()
-    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL)
     password = models.CharField(max_length=12, blank=True)
     usage = models.IntegerField(blank=True)
     admin = models.BooleanField(default=False)
