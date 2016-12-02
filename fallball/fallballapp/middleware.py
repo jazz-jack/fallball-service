@@ -13,10 +13,14 @@ logger = logging.getLogger('info_logger')
 class RequestLogMiddleware(object):
 
     def __init__(self):
-        self.log = {'request': {}, 'response': {}}
+        self.log = {'request': {'headers': {}}, 'response': {'headers': ''}}
 
     def process_request(self, request):
         request.start_time = time.time()
+
+        if 'HTTP_AUTHORIZATION' in request.META:
+            token = request.META['HTTP_AUTHORIZATION']
+            self.log['request']['headers']['HTTP_AUTHORIZATION'] = token
 
         if request.body:
             try:
@@ -34,9 +38,8 @@ class RequestLogMiddleware(object):
         if response.content and response['content-type'] == 'application/json':
             self.log['response']['body'] = json.loads(response.content.decode())
 
-        self.log['request']['headers'] = {
-            'REQUEST_METHOD': request.META['REQUEST_METHOD'],
-        }
+        self.log['request']['headers']['REQUEST_METHOD'] = request.META['REQUEST_METHOD'],
+
         if 'CONTENT_TYPE' in request.META:
             self.log['request']['headers']['CONTENT_TYPE'] = request.META['CONTENT_TYPE'],
 
