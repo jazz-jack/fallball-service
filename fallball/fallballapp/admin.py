@@ -90,7 +90,7 @@ class ClientUserAdmin(admin.ModelAdmin):
     fields = ['email', 'client', 'password', 'owner', 'usage', 'limit', 'profile_type']
     list_display = ['email', 'client', 'password', 'usage', 'limit', 'profile_type']
     readonly_fields = []
-    search_fields = ['email', 'client__id', 'password']
+    search_fields = ['email', 'client__name', 'password']
 
     def get_readonly_fields(self, request, client_user=None):
         if client_user:
