@@ -90,7 +90,7 @@ class ClientUser(models.Model):
     )
     email = models.EmailField()
     owner = models.OneToOneField(settings.AUTH_USER_MODEL)
-    password = models.CharField(max_length=12, blank=True)
+    password = models.CharField(max_length=128, blank=True)
     usage = models.IntegerField(blank=True)
     admin = models.BooleanField(default=False)
     limit = models.IntegerField()
