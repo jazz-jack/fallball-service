@@ -21,8 +21,8 @@ class ResellerInline(BaseInline):
 
 
 class ApplicationAdmin(admin.ModelAdmin):
-    fields = ['id', 'owner']
-    list_display = ['id', 'token']
+    fields = ['id', 'owner', 'async']
+    list_display = ['id', 'token', 'async']
     inlines = [ResellerInline, ]
     readonly_fields = []
     search_fields = ['id']
@@ -71,9 +71,9 @@ class ClientUserInline(BaseInline):
 
 
 class ClientAdmin(admin.ModelAdmin):
-    fields = ['name', 'limit', 'reseller']
-    list_display = ['name', 'get_usage', 'users', 'limit', 'reseller']
-    readonly_fields = []
+    fields = ['name', 'limit', 'reseller', 'status']
+    list_display = ['name', 'get_usage', 'users', 'limit', 'reseller', 'status']
+    readonly_fields = ['status']
     search_fields = ['name', 'reseller__name']
     inlines = [ClientUserInline, ]
 

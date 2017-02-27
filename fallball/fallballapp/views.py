@@ -24,8 +24,8 @@ except ImportError:
 from fallballapp.middleware import logger
 from fallballapp.models import Application, Client, ClientUser, Reseller, UNLIMITED
 from fallballapp.renderers import PlainTextRenderer
-from fallballapp.serializers import (ApplicationSerializer, ClientSerializer,
-                                     ClientUserSerializer, ResellerSerializer,
+from fallballapp.serializers import (ApplicationSerializer, ApplicationPutSerializer,
+                                     ClientSerializer, ClientUserSerializer, ResellerSerializer,
                                      ResellerNameSerializer, UserAuthorizationSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token,
                                is_superuser, is_application, get_user_context, free_space)
@@ -43,8 +43,12 @@ class Description(APIView):
 class ApplicationViewSet(ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = ApplicationSerializer
     queryset = Application.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return ApplicationPutSerializer
+        return ApplicationSerializer
 
     @is_superuser
     def create(self, request, *args, **kwargs):
@@ -61,6 +65,10 @@ class ApplicationViewSet(ModelViewSet):
     @is_superuser
     def destroy(self, request, *args, **kwargs):
         return ModelViewSet.destroy(self, request, *args, **kwargs)
+
+    @is_superuser
+    def update(self, request, *args, **kwargs):
+        return ModelViewSet.update(self, request, *args, partial=True, **kwargs)
 
 
 class ResellerViewSet(ModelViewSet):

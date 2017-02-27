@@ -1,6 +1,10 @@
+import random
+import datetime
+
 from django.db import models
 from django.db.models import Sum
 from django.conf import settings
+from django.utils import timezone
 
 UNLIMITED = -1
 
@@ -8,6 +12,7 @@ UNLIMITED = -1
 class Application(models.Model):
     id = models.CharField(max_length=150, primary_key=True)
     owner = models.OneToOneField(settings.AUTH_USER_MODEL)
+    async = models.BooleanField(default=False)
 
     def __str__(self):
         return self.id
@@ -45,11 +50,15 @@ class Reseller(models.Model):
 
 
 class Client(models.Model):
+    ASYNC_PROVISION_DELAY = 120  # time to complete provisioning in async scenario
+    STATUS_PROVISIONING = 'provisioning'
+    STATUS_READY = 'ready'
     # Instance_id contains company name and used as client id
     name = models.CharField(max_length=150)
     is_integrated = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     limit = models.IntegerField()
+    ready_at = models.DateTimeField(default=timezone.now())
 
     # Every client belongs to particular reseller
     reseller = models.ForeignKey(Reseller)
@@ -59,6 +68,14 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.id and self.reseller.application.async:
+            delay = Client.ASYNC_PROVISION_DELAY \
+                    + random.randint(-Client.ASYNC_PROVISION_DELAY/2,
+                                     Client.ASYNC_PROVISION_DELAY/2)
+            self.ready_at = timezone.now() + datetime.timedelta(seconds=delay)
+        super(Client, self).save(*args, **kwargs)
 
     def get_usage(self):
         """
@@ -79,6 +96,10 @@ class Client(models.Model):
         """
         return {k: ClientUser.objects.filter(client=self, profile_type=k).count() for k in
                 dict(ClientUser.USER_PROFILE_TYPES)}
+
+    @property
+    def status(self):
+        return Client.STATUS_READY if timezone.now() > self.ready_at else Client.STATUS_PROVISIONING
 
 
 class ClientUser(models.Model):
