@@ -1,10 +1,11 @@
 # FallBall
-[![Build Status](https://travis-ci.org/odin-public/fallball-service.svg?branch=master)](https://travis-ci.org/odin-public/fallball-service)
-[![Coverage Status](https://coveralls.io/repos/github/odin-public/fallball-service/badge.svg?branch=master)](https://coveralls.io/github/odin-public/fallball-service?branch=master)
+[![Build Status](https://travis-ci.org/ingrammicro/fallball-service.svg?branch=master)](https://travis-ci.org/ingrammicro/fallball-service)
+[![codecov](https://codecov.io/gh/ingrammicro/fallball-service/branch/master/graph/badge.svg)](https://codecov.io/gh/ingrammicro/fallball-service)
+
 
 ## Overview
 FallBall is the best in class file sharing service that offers cloud storage and file synchronization for small and medium businesses (SMBs) worldwide.
-This dummy service helps developers to learn [APS Lite](http://aps.odin.com) technology 
+This dummy service helps developers to learn [APS Connect](http://aps.odin.com) technology 
 
 ## Manual Deploy
 1. Create application database:
