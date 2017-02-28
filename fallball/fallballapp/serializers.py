@@ -26,7 +26,7 @@ class ApplicationSerializer(AuthorizationSerializer):
 
     class Meta:
         model = Application
-        fields = ('id', 'entrypoint', 'token')
+        fields = ('id', 'entrypoint', 'token', 'async')
 
     def get_entrypoint(self, obj):
         return 'https://{}/v1/'.format(settings.SERVICE_HOST)
@@ -37,6 +37,13 @@ class ApplicationSerializer(AuthorizationSerializer):
 
         user = get_user_model().objects.create(username=validated_data['id'])
         return Application.objects.create(owner=user, **validated_data)
+
+
+class ApplicationPutSerializer(AuthorizationSerializer):
+
+    class Meta:
+        model = Application
+        fields = ('async',)
 
 
 class StorageResellerSerializer(rest_serializers.HyperlinkedModelSerializer):
@@ -107,7 +114,9 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Client
         fields = (
-            'name', 'creation_date', 'users_amount', 'users_by_type', 'storage', 'is_integrated')
+            'name', 'creation_date', 'users_amount', 'users_by_type', 'storage', 'is_integrated',
+            'status')
+        read_only_fields = ('status',)
 
     def create(self, validated_data):
         """

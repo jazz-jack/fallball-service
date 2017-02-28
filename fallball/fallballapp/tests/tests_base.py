@@ -3,6 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -32,6 +33,7 @@ class BaseTestCase(TestCase):
                 'admin',
                 'admin@fallball.io',
                 '1q2w3e')
+        self.admin = admin
         client_request = _get_client(admin.id)
 
         # create_application
@@ -476,3 +478,50 @@ class BaseTestCase(TestCase):
 
         user = ClientUser.objects.get(client=client, email='new@sunnyflowers.tld').owner
         self.assertTrue(user.check_password('newpassword'))
+
+    def test_sync_instantly_ready(self):
+        app = Application.objects.all().first()
+        app.async = False
+        app.save()
+        reseller = Reseller.objects.filter(application=app).first()
+
+        client = Client.objects.create(name='sync_client', limit=100, reseller=reseller)
+
+        self.assertEqual(client.status, Client.STATUS_READY)
+
+    def test_async_ready_after_timeout(self):
+        app = Application.objects.all().first()
+        app.async = True
+        app.save()
+        reseller = Reseller.objects.filter(application=app).first()
+
+        client = Client.objects.create(name='sync_client', limit=100, reseller=reseller)
+
+        self.assertEqual(client.status, Client.STATUS_PROVISIONING)
+
+        client.ready_at = timezone.now()
+        client.save()
+
+        client = Client.objects.filter(name='sync_client', reseller=reseller).first()
+
+        self.assertEqual(client.status, Client.STATUS_READY)
+
+    def test_app_set_async(self):
+        app = Application.objects.all().first()
+        app.async = False
+        app.save()
+
+        url = reverse('v1:applications-detail', kwargs={'pk': app.pk})
+        request = _get_client(self.admin.id)
+
+        resp = request.put(url, json.dumps({'async': True}), content_type='application/json')
+
+        self.assertEqual(resp.status_code, 200)
+        app = Application.objects.get(pk=app.pk)
+        self.assertTrue(app.async)
+
+        resp = request.put(url, json.dumps({'async': False}), content_type='application/json')
+
+        self.assertEqual(resp.status_code, 200)
+        app = Application.objects.get(pk=app.pk)
+        self.assertFalse(app.async)
