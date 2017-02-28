@@ -22,6 +22,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='client',
             name='ready_at',
-            field=models.DateTimeField(default=datetime.datetime(2017, 1, 1, 0, 0, 0, 0, tzinfo=utc)),
+            field=models.DateTimeField(default=datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=utc)),
         ),
     ]
