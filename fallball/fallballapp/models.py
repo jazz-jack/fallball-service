@@ -58,7 +58,7 @@ class Client(models.Model):
     is_integrated = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     limit = models.IntegerField()
-    ready_at = models.DateTimeField(default=timezone.now())
+    ready_at = models.DateTimeField(default=timezone.now)
 
     # Every client belongs to particular reseller
     reseller = models.ForeignKey(Reseller)
