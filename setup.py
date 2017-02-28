@@ -38,8 +38,8 @@ with open(join(dirname(abspath(__file__)), 'requirements.txt'), 'r') as requirem
 setup(
     name='fallball',
     version=version(),
-    author='APS Lite team',
-    author_email='apslite@odin.com',
+    author='APS Connect team',
+    author_email='aps@odin.com',
     packages=find_packages('fallball'),
     package_dir={'': 'fallball'},
     include_package_data=True,
@@ -47,6 +47,6 @@ setup(
     test_suite="fallball.runtests",
     url='https://fallball.io',
     license='Apache License',
-    description='Dummy file sharing service available by REST api.',
+    description='Fallball file sharing service available by REST api.',
     long_description=open(join(dirname(abspath(__file__)), 'README.md')).read(),
 )
