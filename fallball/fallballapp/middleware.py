@@ -13,10 +13,12 @@ logger = logging.getLogger('info_logger')
 class RequestLogMiddleware(object):
 
     def __init__(self):
-        self.log = {'request': {'headers': {}}, 'response': {'headers': ''}}
+        self.log = {'request': {'headers': {}}, 'response': {'headers': {}}}
 
     def process_request(self, request):
         request.start_time = time.time()
+
+        self.log['request'] = {'headers': {}}
 
         if 'HTTP_AUTHORIZATION' in request.META:
             token = request.META['HTTP_AUTHORIZATION']
@@ -29,6 +31,8 @@ class RequestLogMiddleware(object):
                 self.log['request']['body'] = {"message": "body is not valid json"}
 
     def process_response(self, request, response):
+        self.log['response'] = {'headers': {}}
+
         if not hasattr(request, 'user'):
             return response
 
