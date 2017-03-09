@@ -71,15 +71,15 @@ class ClientUserInline(BaseInline):
 
 
 class ClientAdmin(admin.ModelAdmin):
-    fields = ['name', 'limit', 'reseller', 'status']
-    list_display = ['name', 'get_usage', 'users', 'limit', 'reseller', 'status']
+    fields = ['name', 'email', 'limit', 'reseller', 'status']
+    list_display = ['name', 'email', 'get_usage', 'users', 'limit', 'reseller', 'status']
     readonly_fields = ['status']
     search_fields = ['name', 'reseller__name']
     inlines = [ClientUserInline, ]
 
     def get_readonly_fields(self, request, client=None):
         if client:
-            return self.readonly_fields + ['reseller', 'name']
+            return self.readonly_fields + ['reseller', 'name', 'email']
         return self.readonly_fields
 
     def users(self, obj):

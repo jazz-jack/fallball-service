@@ -110,13 +110,19 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
     storage = StorageClientSerializer(source='*')
     users_amount = rest_serializers.SerializerMethodField()
     users_by_type = rest_serializers.SerializerMethodField()
+    email = rest_serializers.EmailField(required=False)
 
     class Meta:
         model = Client
         fields = (
-            'name', 'creation_date', 'users_amount', 'users_by_type', 'storage', 'is_integrated',
-            'status')
+            'name', 'email', 'creation_date', 'users_amount', 'users_by_type', 'storage',
+            'is_integrated', 'status')
         read_only_fields = ('status',)
+
+    def validate_email(self, value):
+        if '+' in value:
+            raise rest_serializers.ValidationError("Plus signs are not allowed in email")
+        return value
 
     def create(self, validated_data):
         """
