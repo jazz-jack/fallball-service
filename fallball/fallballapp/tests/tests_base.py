@@ -526,13 +526,13 @@ class BaseTestCase(TestCase):
         app = Application.objects.get(pk=app.pk)
         self.assertFalse(app.async)
 
-    def test_email_with_plus_sign_not_allowed(self):
+    def test_email_with_dot_not_allowed(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_client(reseller.owner)
         resp = client_request.post(url, json.dumps({'name': 'new_client',
                                                     'storage': {'limit': 200},
-                                                    'email': 'new+client@fallball.io'
+                                                    'email': 'new.client@fallball.io'
                                                     }),
                                    content_type='application/json')
 
@@ -543,11 +543,11 @@ class BaseTestCase(TestCase):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_client(reseller.owner)
-        resp = client_request.post(url, json.dumps({'name': 'new_client',
-                                                    'storage': {'limit': 200},
-                                                    'email': 'new_client@fallball.io'
-                                                    }),
-                                   content_type='application/json')
+        client_request.post(url, json.dumps({'name': 'new_client',
+                                             'storage': {'limit': 200},
+                                             'email': 'new_client@fallball.io'
+                                             }),
+                            content_type='application/json')
 
         client = Client.objects.filter(name='new_client').first()
 
