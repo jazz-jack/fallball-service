@@ -120,8 +120,9 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
         read_only_fields = ('status',)
 
     def validate_email(self, value):
-        if '+' in value:
-            raise rest_serializers.ValidationError("Plus signs are not allowed in email")
+        if '.' in value.split('@')[0]:
+            raise rest_serializers.ValidationError("Dots are not allowed "
+                                                   "in local parts of email addresses")
         return value
 
     def create(self, validated_data):
