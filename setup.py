@@ -3,7 +3,7 @@ import time
 from os.path import join, dirname, abspath
 from setuptools import find_packages, setup
 
-PACKAGE_VERSION = '0.1'
+PACKAGE_VERSION = '1.0'
 
 
 def version():
