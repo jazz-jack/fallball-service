@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Application, Client, ClientUser, Reseller
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.admin import TokenAdmin as BaseTokenAdmin
 
 
 class BaseInline(admin.TabularInline):
@@ -98,9 +99,14 @@ class ClientUserAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 
+class TokenAdmin(BaseTokenAdmin):
+    fields = ('key', 'user')
+
+
 admin.site.register(Application, ApplicationAdmin)
 admin.site.register(Reseller, ResellerAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(ClientUser, ClientUserAdmin)
 
 admin.site.unregister(Token)
+admin.site.register(Token, TokenAdmin)
