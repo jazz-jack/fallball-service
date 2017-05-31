@@ -26,7 +26,5 @@ deploy:
   password:
     secure: SIzaFoqufsMBjAWbTZXUOs2EnOJ8XEZKJmH7O+7KXIwdxrp0T/ePx/DNeeJOBnui4iicXUVn/+Fspn930FHAoT5f1M+aGSwUf52HNilgHnd0ivRUuKDzjXzGwqrInDkQH58yfWFzI6scj3vCj+IeC4Ddlazs+CN0YsB0ZN82r1hkp2YMyd6hjQCVCtQRKRXiw/aaDTCFPHKEjfqJFER9iYfzqQ23UK0qB7EciBWcbvDhLX9Ycy0gGMEBhB8fnH9joaZJHwkZn8Tny8+7elKAstp3OrAD2lP6/U4T4dlVeeX/jJ2wqahXLnx67fEe67ISY26aBbWwnagUdo1OeHXeyw2uQdDI1U0IdMN6hMPV6Y4/dIGV1jZ2dywY2xmHtCOeHZYd/lyaZXoejtQRXTIfhFUqc73m+MAhpLguNP1+etlIyglwieixMyuHlxIIglOGyDKz4FyyB8/9nMVtXajVXPhlN41qdZkub9Vxm0gjXT9IvedsIrVktyJzVjkUqg2gRi2fk/b6EGWTHhia/IQrpRiC9nDDhptnfriCL94p5W58BcrJsGI23odSK9Y07HzKygG5v4ycLlrjROoOuXlq4tn6r6orVKhbedDdSC6LNvHetJK8ZSdnhXmY/lTXEf0H/Wumxyyd7RzWkVTPfoAIsDnzIesIDE0YDYvRjoyV2QA=
   on:
-    tags: true
-    all_branches: true
     distributions: sdist bdist_wheel
     repo: ingrammicro/fallball-service
