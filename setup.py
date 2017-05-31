@@ -1,34 +1,6 @@
-import os
-import time
 from os.path import join, dirname, abspath
+
 from setuptools import find_packages, setup
-
-PACKAGE_VERSION = '1.0'
-
-
-def version():
-    path_version = join(dirname(abspath(__file__)), 'version.txt')
-
-    def version_file(mode='r'):
-        return open(path_version, mode)
-
-    if os.path.exists(path_version):
-        with version_file() as verfile:
-            return verfile.readline().strip()
-
-    if os.getenv('TRAVIS'):
-        build_version = os.getenv('TRAVIS_BUILD_NUMBER')
-    elif os.getenv('JENKINS_HOME'):
-        build_version = 'jenkins{}'.format(os.getenv('BUILD_NUMBER'))
-    else:
-        build_version = 'dev{}'.format(int(time.time()))
-
-    with version_file('w') as verfile:
-        verfile.write('{0}.{1}'.format(PACKAGE_VERSION, build_version))
-
-    with version_file() as verfile:
-        return verfile.readline().strip()
-
 
 with open(join(dirname(abspath(__file__)), 'requirements.txt'), 'r') as requirements:
     requirements_list = []
@@ -37,7 +9,7 @@ with open(join(dirname(abspath(__file__)), 'requirements.txt'), 'r') as requirem
 
 setup(
     name='fallball',
-    version=version(),
+    version='1.0.92',
     author='APS Connect team',
     author_email='aps@odin.com',
     packages=find_packages('fallball'),
