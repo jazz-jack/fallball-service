@@ -1,6 +1,5 @@
 # FallBall
-[![Build Status](https://travis-ci.org/ingrammicro/fallball-service.svg?branch=master)](https://travis-ci.org/ingrammicro/fallball-service)
-[![codecov](https://codecov.io/gh/ingrammicro/fallball-service/branch/master/graph/badge.svg)](https://codecov.io/gh/ingrammicro/fallball-service)
+[![Build Status](https://travis-ci.org/ingrammicro/fallball-service.svg?branch=master)](https://travis-ci.org/ingrammicro/fallball-service) [![codecov](https://codecov.io/gh/ingrammicro/fallball-service/branch/master/graph/badge.svg)](https://codecov.io/gh/ingrammicro/fallball-service)
 
 
 ## Overview
