@@ -1,5 +1,5 @@
 # FallBall Service (backend)
-[![Build Status](https://travis-ci.org/ingrammicro/fallball-service.svg?branch=master)](https://travis-ci.org/ingrammicro/fallball-service) [![PyPi Status](https://img.shields.io/pypi/v/fallball.svg)](https://pypi.python.org/pypi/osaapi) [![codecov](https://codecov.io/gh/ingrammicro/fallball-service/branch/master/graph/badge.svg)](https://codecov.io/gh/ingrammicro/fallball-service)
+[![Build Status](https://travis-ci.org/ingrammicro/fallball-service.svg?branch=master)](https://travis-ci.org/ingrammicro/fallball-service) [![PyPi Status](https://img.shields.io/pypi/v/fallball.svg)](https://pypi.python.org/pypi/fallball) [![codecov](https://codecov.io/gh/ingrammicro/fallball-service/branch/master/graph/badge.svg)](https://codecov.io/gh/ingrammicro/fallball-service)
 
 
 ## Overview
