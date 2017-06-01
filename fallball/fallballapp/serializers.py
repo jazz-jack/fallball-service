@@ -110,13 +110,14 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
     storage = StorageClientSerializer(source='*')
     users_amount = rest_serializers.SerializerMethodField()
     users_by_type = rest_serializers.SerializerMethodField()
+    email = rest_serializers.EmailField(required=False)
     postal_code = rest_serializers.CharField(required=False)
 
     class Meta:
         model = Client
         fields = (
-            'name', 'postal_code', 'creation_date', 'users_amount', 'users_by_type', 'storage',
-            'is_integrated', 'status')
+            'name', 'email', 'postal_code', 'creation_date', 'users_amount', 'users_by_type',
+            'storage', 'is_integrated', 'status')
         read_only_fields = ('status',)
 
     def validate_postal_code(self, value):

@@ -72,8 +72,9 @@ class ClientUserInline(BaseInline):
 
 
 class ClientAdmin(admin.ModelAdmin):
-    fields = ['name', 'postal_code', 'limit', 'reseller', 'status']
-    list_display = ['name', 'postal_code', 'get_usage', 'users', 'limit', 'reseller', 'status']
+    fields = ['name', 'email', 'postal_code', 'limit', 'reseller', 'status']
+    list_display = ['name', 'email', 'postal_code', 'get_usage', 'users', 'limit', 'reseller',
+                    'status']
     readonly_fields = ['status']
     search_fields = ['name', 'reseller__name']
     inlines = [ClientUserInline, ]
