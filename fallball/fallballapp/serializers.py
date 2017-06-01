@@ -110,19 +110,22 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
     storage = StorageClientSerializer(source='*')
     users_amount = rest_serializers.SerializerMethodField()
     users_by_type = rest_serializers.SerializerMethodField()
-    email = rest_serializers.EmailField(required=False)
+    postal_code = rest_serializers.CharField(required=False)
 
     class Meta:
         model = Client
         fields = (
-            'name', 'email', 'creation_date', 'users_amount', 'users_by_type', 'storage',
+            'name', 'postal_code', 'creation_date', 'users_amount', 'users_by_type', 'storage',
             'is_integrated', 'status')
         read_only_fields = ('status',)
 
-    def validate_email(self, value):
-        if '.' in value.split('@')[0]:
-            raise rest_serializers.ValidationError("Dots are not allowed "
-                                                   "in local parts of email addresses")
+    def validate_postal_code(self, value):
+        if not value.isdigit() or len(value) != 5:
+            raise rest_serializers.ValidationError("Postal code must be a 5-digit number")
+
+        if value.startswith('999'):
+            raise rest_serializers.ValidationError("Postal code can't starts with 999")
+
         return value
 
     def create(self, validated_data):

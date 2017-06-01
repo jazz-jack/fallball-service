@@ -526,35 +526,35 @@ class BaseTestCase(TestCase):
         app = Application.objects.get(pk=app.pk)
         self.assertFalse(app.async)
 
-    def test_email_with_dot_not_allowed(self):
+    def test_postal_code_with_999_is_not_allowed(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_client(reseller.owner)
         resp = client_request.post(url, json.dumps({'name': 'new_client',
                                                     'storage': {'limit': 200},
-                                                    'email': 'new.client@fallball.io'
+                                                    'postal_code': '99912'
                                                     }),
                                    content_type='application/json')
 
         self.assertEqual(resp.status_code, 400)
-        assert 'email' in resp.json()
+        assert 'postal_code' in resp.json()
 
-    def test_client_email_is_saved(self):
+    def test_client_postal_code_is_saved(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_client(reseller.owner)
         client_request.post(url, json.dumps({'name': 'new_client',
                                              'storage': {'limit': 200},
-                                             'email': 'new_client@fallball.io'
+                                             'postal_code': '12345'
                                              }),
                             content_type='application/json')
 
         client = Client.objects.filter(name='new_client').first()
 
         assert client is not None
-        self.assertEqual(client.email, 'new_client@fallball.io')
+        self.assertEqual(client.postal_code, '12345')
 
-    def test_client_email_is_null_if_not_provided(self):
+    def test_client_postal_code_is_null_if_not_provided(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_client(reseller.owner)
@@ -568,4 +568,4 @@ class BaseTestCase(TestCase):
         client = Client.objects.filter(name='new_client').first()
 
         assert client is not None
-        assert client.email is None
+        assert client.postal_code is None
