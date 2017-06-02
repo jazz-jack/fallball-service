@@ -57,6 +57,7 @@ class Client(models.Model):
     # Instance_id contains company name and used as client id
     name = models.CharField(max_length=150)
     email = models.EmailField(blank=True, null=True, default=None)
+    postal_code = models.CharField(max_length=16, blank=True, null=True, default=None)
     is_integrated = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     limit = models.IntegerField()
