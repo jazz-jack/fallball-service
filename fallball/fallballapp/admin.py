@@ -65,7 +65,7 @@ class ResellerAdmin(admin.ModelAdmin):
 class ClientUserInline(BaseInline):
     model = ClientUser
     extra = 0
-    readonly_fields = ['email', 'limit', 'owner', 'password']
+    readonly_fields = ['user_id', 'email', 'limit', 'owner', 'password']
 
     def has_add_permission(self, request):
         return False
@@ -88,10 +88,10 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class ClientUserAdmin(admin.ModelAdmin):
-    fields = ['email', 'client', 'password', 'owner', 'usage', 'limit', 'profile_type']
-    list_display = ['email', 'client', 'password', 'usage', 'limit', 'profile_type']
-    readonly_fields = []
-    search_fields = ['email', 'client__name', 'password']
+    fields = ['user_id', 'email', 'client', 'password', 'owner', 'usage', 'limit', 'profile_type']
+    list_display = ['user_id', 'email', 'client', 'password', 'usage', 'limit', 'profile_type']
+    readonly_fields = ['user_id']
+    search_fields = ['user_id', 'email', 'client__name', 'password']
 
     def get_readonly_fields(self, request, client_user=None):
         if client_user:

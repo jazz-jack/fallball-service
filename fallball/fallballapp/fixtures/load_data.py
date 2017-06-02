@@ -55,7 +55,7 @@ def load_data(apps, schema_editor):
 
                 if 'users' in client_template:
                     for user_template in client_template['users']:
-                        username = get_app_username(app.id, user_template['email'])
+                        username = get_app_username(app.id, user_template['user_id'])
                         owner, created = apps.get_model('auth', 'User').objects.get_or_create(
                             username=username)
                         apps.get_model('authtoken', 'Token').objects.get_or_create(

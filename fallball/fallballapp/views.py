@@ -220,9 +220,9 @@ class ClientUserViewSet(ModelViewSet):
     serializer_class = ClientUserSerializer
     authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
-    lookup_field = 'email'
-    # Redefine regex in order to get user email as id
-    lookup_value_regex = '[^@]+@[^@]+\.[^@/]+'
+    lookup_field = 'user_id'
+    # Redefine regex in order to get user_id as id
+    lookup_value_regex = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 
     @get_user_context
     def create(self, *args, **kwargs):
@@ -230,8 +230,14 @@ class ClientUserViewSet(ModelViewSet):
         client = kwargs['client']
         reseller = kwargs['reseller']
 
-        if ClientUser.objects.filter(email=request.data['email'], client=kwargs['client']):
+        if 'user_id' in request.data and ClientUser.objects.filter(user_id=request.data['user_id'],
+                                                                   client=kwargs['client']):
             return Response("Such user already exists", status=status.HTTP_400_BAD_REQUEST)
+
+        if 'email' in request.data and ClientUser.objects.filter(email=request.data['email'],
+                                                                 client=kwargs['client']):
+            return Response("User with email {} already exists".format(request.data['email']),
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if 'usage' in request.data:
             return Response("Usage should not be specified", status=status.HTTP_400_BAD_REQUEST)
@@ -255,7 +261,8 @@ class ClientUserViewSet(ModelViewSet):
 
     @get_user_context
     def destroy(self, *args, **kwargs):
-        client_user = get_object_or_404(ClientUser, email=kwargs['email'], client=kwargs['client'])
+        client_user = get_object_or_404(ClientUser, user_id=kwargs['user_id'],
+                                        client=kwargs['client'])
         client_user.delete()
         return Response("User has been deleted", status=status.HTTP_204_NO_CONTENT)
 
@@ -267,7 +274,7 @@ class ClientUserViewSet(ModelViewSet):
 
     @get_user_context
     def retrieve(self, *args, **kwargs):
-        queryset = ClientUser.objects.filter(client=kwargs['client'], email=kwargs['email'])
+        queryset = ClientUser.objects.filter(client=kwargs['client'], user_id=kwargs['user_id'])
         if not queryset:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
         serializer = ClientUserSerializer(queryset, many=True)
@@ -276,10 +283,10 @@ class ClientUserViewSet(ModelViewSet):
     @get_user_context
     def update(self, *args, **kwargs):
         client_user = ClientUser.objects.filter(client=kwargs['client'],
-                                                email=kwargs['email']).first()
+                                                user_id=kwargs['user_id']).first()
 
         if not client_user:
-            args[0].data['email'] = kwargs['email']
+            args[0].data['user_id'] = kwargs['user_id']
             return self.create(*args, **kwargs)
 
         request = args[0]
@@ -287,7 +294,7 @@ class ClientUserViewSet(ModelViewSet):
         if 'password' in request.data:
             user = get_object_or_404(get_user_model(),
                                      username=get_app_username(kwargs['application'],
-                                                               kwargs['email']))
+                                                               kwargs['user_id']))
             user.set_password(request.data['password'])
             user.save()
             client_user.password = request.data['password']
@@ -335,7 +342,7 @@ class ClientUserViewSet(ModelViewSet):
                 reseller = admin.client.reseller
 
         client = Client.objects.filter(reseller=reseller, name=kwargs['client_name'])
-        clientuser = ClientUser.objects.filter(client=client, email=kwargs['email']).first()
+        clientuser = ClientUser.objects.filter(client=client, user_id=kwargs['user_id']).first()
         if not clientuser or not clientuser.owner:
             return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
 
