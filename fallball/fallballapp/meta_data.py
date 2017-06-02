@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from django.contrib.auth import get_user_model
 
@@ -27,18 +28,21 @@ data = [
                 'limit': 50,
                 'users': [
                     {
+                        'user_id': uuid.uuid4(),
                         'email': 'johnson@sunnyflowers.tld',
                         'usage': 3,
                         'admin': False,
                         'limit': 5
                     },
                     {
+                        'user_id': uuid.uuid4(),
                         'email': 'brown@sunnyflowers.tld',
                         'usage': 2,
                         'admin': False,
                         'limit': 6
                     },
                     {
+                        'user_id': uuid.uuid4(),
                         'email': 'williams@sunnyflowers.tld',
                         'usage': 1,
                         'admin': True,
@@ -78,7 +82,7 @@ def load_app_data(app_instance):
 
                 if 'users' in client_template:
                     for user_template in client_template['users']:
-                        username = get_app_username(app_instance.id, user_template['email'])
+                        username = get_app_username(app_instance.id, user_template['user_id'])
                         owner = get_user_model().objects.create_user(username=username)
                         params = dict.copy(user_template)
                         params.pop('users', None)
