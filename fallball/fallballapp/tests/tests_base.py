@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -107,7 +108,7 @@ class BaseTestCase(TestCase):
         client_name = client_user.client.name
         url = reverse('v1:users-detail', kwargs={'reseller_name': reseller.name,
                                                  'client_name': client_name,
-                                                 'email': client_user.email})
+                                                 'user_id': client_user.user_id})
         client_request.delete(url, content_type='application/json')
         self.assertFalse(ClientUser.objects.filter(email=client_user.email))
 
@@ -121,12 +122,12 @@ class BaseTestCase(TestCase):
         client_request = _get_client(app.owner.id)
 
         client_user = ClientUser.objects.filter().first()
-        email = client_user.email
+        user_id = client_user.user_id
         client_name = client_user.client.name
         reseller_name = client_user.client.reseller.name
         url = reverse('v1:users-detail', kwargs={'reseller_name': reseller_name,
                                                  'client_name': client_name,
-                                                 'email': email})
+                                                 'user_id': user_id})
         request = client_request.post(url, content_type='application/json')
         self.assertFalse(request.status_code == 200)
 
@@ -244,11 +245,11 @@ class BaseTestCase(TestCase):
         client_user = ClientUser.objects.filter().first()
         res_name = reseller.name
         client_name = client_user.client.name
-        email = client_user.email
+        user_id = client_user.user_id
 
         url = reverse('v1:users-detail', kwargs={'reseller_name': res_name,
                                                  'client_name': client_name,
-                                                 'email': email})
+                                                 'user_id': user_id})
         code = client_request.get('{}{}'.format(url, 'token/'),
                                   content_type='application/json').status_code
         self.assertEqual(code, 200)
@@ -329,7 +330,7 @@ class BaseTestCase(TestCase):
         user = ClientUser.objects.filter(admin=False, client=admin.client).first()
         url = reverse('v1:users-detail', kwargs={'reseller_name': reseller_name,
                                                  'client_name': client_name,
-                                                 'email': user.email})
+                                                 'user_id': user.user_id})
         code = request.get(url).status_code
         self.assertEqual(code, 200)
 
@@ -353,7 +354,7 @@ class BaseTestCase(TestCase):
         reseller_request = _get_client(user.client.reseller.owner, accept='text/plain')
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
-                                                 'email': user.email})
+                                                 'user_id': user.user_id})
         # Get link for existing user
         resp = reseller_request.get('{}{}'.format(url, 'link/'))
         self.assertTrue('text/plain; charset=utf-8' in resp._headers['content-type'])
@@ -362,7 +363,7 @@ class BaseTestCase(TestCase):
 
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
-                                                 'email': 'random-user@does-not-exist.local'})
+                                                 'user_id': 'ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb'})
         # Get link for non-existing user
         resp = reseller_request.get('{}{}'.format(url, 'link/'))
         self.assertEqual(resp.status_code, 200)
@@ -375,7 +376,7 @@ class BaseTestCase(TestCase):
 
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
-                                                 'email': user.email})
+                                                 'user_id': user.user_id})
 
         # limit is reached
         resp = request.put(url, json.dumps({'email': user.email,
@@ -413,15 +414,16 @@ class BaseTestCase(TestCase):
     def test_put_creation(self):
         admin = ClientUser.objects.filter(admin=True).first()
         request = _get_client(admin.owner)
-
+        user_id = uuid.uuid4()
         url = reverse('v1:users-detail', kwargs={'reseller_name': admin.client.reseller.name,
                                                  'client_name': admin.client.name,
-                                                 'email': 'new@sunnyflowers.tld'})
+                                                 'user_id': user_id})
 
-        resp = request.put(url, json.dumps({'storage': {'limit': 5}}),
+        resp = request.put(url, json.dumps({'storage': {'limit': 5},
+                                            'email': 'user@domain.tld'}),
                            content_type='application/json')
 
-        self.assertTrue(ClientUser.objects.filter(email='new@sunnyflowers.tld',
+        self.assertTrue(ClientUser.objects.filter(user_id=user_id,
                                                   client=admin.client))
 
         self.assertEqual(resp.status_code, 201)
@@ -466,10 +468,11 @@ class BaseTestCase(TestCase):
                                              'storage': {'limit': 5}}),
                             content_type='application/json')
         self.assertEqual(resp.status_code, 201)
+        user_id = resp.json()['user_id']
 
         url = reverse('v1:users-detail', kwargs={'reseller_name': reseller.name,
                                                  'client_name': client.name,
-                                                 'email': 'new@sunnyflowers.tld'})
+                                                 'user_id': user_id})
         resp = request.put(url, json.dumps({'email': 'new@sunnyflowers.tld',
                                             'storage': {'usage': 3, 'limit': 5},
                                             'password': 'newpassword'}),

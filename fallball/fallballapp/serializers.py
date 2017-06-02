@@ -1,4 +1,5 @@
 from random import randint
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -155,17 +156,22 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
     password = rest_serializers.CharField(required=False)
     profile_type = rest_serializers.ChoiceField(choices=ClientUser.USER_PROFILE_TYPES,
                                                 required=False)
+    email = rest_serializers.EmailField(required=True)
 
     class Meta:
         model = ClientUser
-        fields = ('email', 'password', 'storage', 'admin', 'profile_type')
+        fields = ('user_id', 'email', 'password', 'storage', 'admin', 'profile_type')
 
     def create(self, validated_data):
         # Usage is random but not more than limit
         if 'usage' not in validated_data:
             validated_data['usage'] = randint(0, validated_data['limit'])
-        username = get_app_username(self.initial_data['application_id'], validated_data['email'])
+
+        if 'user_id' not in validated_data:
+            validated_data['user_id'] = uuid.uuid4()
+        username = get_app_username(self.initial_data['application_id'], validated_data['user_id'])
         user = get_user_model().objects.create_user(username=username)
+
         return ClientUser.objects.create(owner=user,
                                          client=self.initial_data['client'], **validated_data)
 
@@ -178,7 +184,7 @@ class UserAuthorizationSerializer(rest_serializers.ModelSerializer):
 
     class Meta:
         model = ClientUser
-        fields = ('email', 'password', 'storage', 'admin', 'company', 'token')
+        fields = ('user_id', 'email', 'password', 'storage', 'admin', 'company', 'token')
 
     def get_company(self, obj):
         return obj.client.name

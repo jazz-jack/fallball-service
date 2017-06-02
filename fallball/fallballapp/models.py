@@ -1,5 +1,6 @@
-import random
 import datetime
+import random
+import uuid
 
 from django.db import models
 from django.db.models import Sum
@@ -111,6 +112,7 @@ class ClientUser(models.Model):
         (DEFAULT_PROFILE, 'Default'),
         (GOLD_PROFILE, 'Gold'),
     )
+    user_id = models.UUIDField(null=True)
     email = models.EmailField()
     owner = models.OneToOneField(settings.AUTH_USER_MODEL)
     password = models.CharField(max_length=128, blank=True)
@@ -122,7 +124,12 @@ class ClientUser(models.Model):
                                     default=DEFAULT_PROFILE)
 
     class Meta:
-        unique_together = ('client', 'email')
+        unique_together = (('client', 'email'), ('client', 'user_id'))
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.user_id:
+            self.user_id = kwargs.get('user_id', uuid.uuid4())
+        super(ClientUser, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.email
