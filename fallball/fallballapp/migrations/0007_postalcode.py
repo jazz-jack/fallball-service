@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fallballapp', '0005_client_email'),
+        ('fallballapp', '0006_client_userid'),
     ]
 
     operations = [
