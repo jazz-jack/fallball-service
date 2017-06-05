@@ -572,3 +572,67 @@ class BaseTestCase(TestCase):
 
         assert client is not None
         assert client.postal_code is None
+
+    def test_superadmin_always_created_with_zero_limit(self):
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_client(reseller.owner)
+        client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
+                            content_type='application/json')
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': 'new_client'})
+        client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
+                                             'storage': {'limit': 30},
+                                             'superadmin': True,
+                                             'password': 'password'}),
+                            content_type='application/json')
+
+        self.assertEqual(ClientUser.objects.get(email='newuser@newclient.tld').limit, 0)
+
+    def test_superadmin_does_not_affect_users_count(self):
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_client(reseller.owner)
+        client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
+                            content_type='application/json')
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': 'new_client'})
+        client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
+                                             'storage': {'limit': 30},
+                                             'superadmin': True,
+                                             'password': 'password'}),
+                            content_type='application/json')
+
+        self.assertTrue(ClientUser.objects.get(email='newuser@newclient.tld'))
+
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller.name,
+                                                   'name': 'new_client'})
+
+        resp = client_request.get(url)
+
+        self.assertEqual(resp.json()['users_amount'], 0)
+        self.assertTrue(all(value == 0 for value in resp.json()['users_by_type'].values()))
+
+    def test_superadmin_invisible_in_get_users_list(self):
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_client(reseller.owner)
+        client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
+                            content_type='application/json')
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': 'new_client'})
+        client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
+                                             'storage': {'limit': 30},
+                                             'superadmin': True,
+                                             'password': 'password'}),
+                            content_type='application/json')
+
+        self.assertTrue(ClientUser.objects.get(email='newuser@newclient.tld'))
+
+        resp = client_request.get(url)
+
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(len(resp.json()), 0)
