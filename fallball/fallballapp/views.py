@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
@@ -21,6 +21,7 @@ except ImportError:
     import urlparse
     from urllib import urlencode
 
+from fallballapp.auth import EmailBasicAuthentication
 from fallballapp.middleware import logger
 from fallballapp.models import Application, Client, ClientUser, Reseller, UNLIMITED
 from fallballapp.renderers import PlainTextRenderer
@@ -389,7 +390,7 @@ class UsersViewSet(ModelViewSet):
     queryset = ClientUser.objects.all()
     serializer_class = UserAuthorizationSerializer
     authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication,
-                              BasicAuthentication)
+                              EmailBasicAuthentication)
 
     def list(self, request, *args, **kwargs):
         queryset = ClientUser.objects.filter(owner_id=request.user.id).first()
