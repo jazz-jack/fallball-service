@@ -154,8 +154,7 @@ class ClientUserSerializer(rest_serializers.ModelSerializer):
     storage = StorageClientUserSerializer(source='*')
     admin = rest_serializers.BooleanField()
     password = rest_serializers.CharField(required=False)
-    profile_type = rest_serializers.ChoiceField(choices=ClientUser.USER_PROFILE_TYPES,
-                                                required=False)
+    profile_type = rest_serializers.CharField(required=False)
     email = rest_serializers.EmailField(required=True)
 
     class Meta:

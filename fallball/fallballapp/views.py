@@ -252,7 +252,7 @@ class ClientUserViewSet(ModelViewSet):
             if 'password' in request.data:
                 request.data.pop('password')
             if 'profile_type' in request.data:
-                if request.data['profile_type'] not in dict(ClientUser.USER_PROFILE_TYPES):
+                if not request.data['profile_type']:
                     request.data['profile_type'] = ClientUser.DEFAULT_PROFILE
 
             return ModelViewSet.create(self, *args, **kwargs)
@@ -316,8 +316,7 @@ class ClientUserViewSet(ModelViewSet):
             client_user.admin = request.data['admin']
 
         if 'profile_type' in request.data:
-            if request.data['profile_type'] in dict(ClientUser.USER_PROFILE_TYPES):
-                client_user.profile_type = request.data['profile_type']
+            client_user.profile_type = request.data['profile_type']
 
         client_user.save()
 
