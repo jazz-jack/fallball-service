@@ -684,4 +684,3 @@ class BaseTestCase(TestCase):
 
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(len(resp.json()), 0)
-
