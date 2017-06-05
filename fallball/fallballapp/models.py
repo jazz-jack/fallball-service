@@ -91,14 +91,16 @@ class Client(models.Model):
         """
         Calculate users amount for particular company
         """
-        return ClientUser.objects.filter(client=self).count()
+        return ClientUser.objects.filter(client=self, superadmin=False).count()
 
     def get_users_by_type(self):
         """
         Calculate number of users of each type for company
         """
         types = ClientUser.objects.order_by().values_list('profile_type', flat=True).distinct()
-        return {k: ClientUser.objects.filter(client=self, profile_type=k).count() for k in types}
+        return {k: ClientUser.objects.filter(client=self,
+                                             profile_type=k,
+                                             superadmin=False).count() for k in types}
 
     @property
     def status(self):
@@ -112,6 +114,7 @@ class ClientUser(models.Model):
     owner = models.OneToOneField(settings.AUTH_USER_MODEL)
     password = models.CharField(max_length=128, blank=True)
     usage = models.IntegerField(blank=True)
+    superadmin = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     limit = models.IntegerField()
     client = models.ForeignKey(Client)
@@ -123,6 +126,9 @@ class ClientUser(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk and not self.user_id:
             self.user_id = kwargs.get('user_id', uuid.uuid4())
+        if self.superadmin:
+            self.admin = True
+            self.limit = self.usage = 0
         super(ClientUser, self).save(*args, **kwargs)
 
     def __str__(self):
