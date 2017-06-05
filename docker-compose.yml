@@ -12,8 +12,6 @@ services:
     expose:
      - "3306"
   app:
-    tty: true
-    stdin_open: true
     build: .
     container_name: fallballapp
     env_file:
