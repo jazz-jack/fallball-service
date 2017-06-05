@@ -89,8 +89,10 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class ClientUserAdmin(admin.ModelAdmin):
-    fields = ['user_id', 'email', 'client', 'password', 'owner', 'usage', 'limit', 'profile_type']
-    list_display = ['user_id', 'email', 'client', 'password', 'usage', 'limit', 'profile_type']
+    fields = ['user_id', 'email', 'client', 'password', 'owner', 'usage', 'limit', 'profile_type',
+              'admin', 'superadmin', ]
+    list_display = ['user_id', 'email', 'client', 'password', 'usage', 'limit', 'profile_type',
+                    'admin', 'superadmin', ]
     readonly_fields = ['user_id']
     search_fields = ['user_id', 'email', 'client__name', 'password']
 

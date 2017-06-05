@@ -250,6 +250,8 @@ class ClientUserViewSet(ModelViewSet):
             request.data['application_id'] = reseller.application.id
             if 'admin' not in request.data:
                 request.data['admin'] = False
+            if 'superadmin' not in request.data:
+                request.data['superadmin'] = False
             if 'password' in request.data:
                 request.data.pop('password')
             if 'profile_type' in request.data:
@@ -269,7 +271,7 @@ class ClientUserViewSet(ModelViewSet):
 
     @get_user_context
     def list(self, *args, **kwargs):
-        queryset = ClientUser.objects.filter(client=kwargs['client'])
+        queryset = ClientUser.objects.filter(client=kwargs['client'], superadmin=False)
         serializer = ClientUserSerializer(queryset, many=True)
         return Response(serializer.data)
 
