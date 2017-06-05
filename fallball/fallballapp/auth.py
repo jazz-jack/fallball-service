@@ -19,5 +19,4 @@ class EmailBasicAuthentication(BasicAuthentication):
 
         user_id = '{}.{}'.format(app, user_obj.user_id)
 
-        return super(EmailBasicAuthentication,
-                     self).authenticate_credentials(user_id, password)
+        return super(EmailBasicAuthentication, self).authenticate_credentials(user_id, password)
