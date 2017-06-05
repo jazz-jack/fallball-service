@@ -597,41 +597,24 @@ class BaseTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def test_basic_auth_by_email_wrong_header(self):
-        auth = base64.b64encode('{}:{}'.format('mock_user', '123qwe123'))
+    def test_basic_auth_by_email_user_does_not_exist(self):
+        app = Application.objects.all().first()
 
-        client_request = APIClient(HTTP_ACCEPT='application/json')
-        client_request.credentials(HTTP_AUTHORIZATION='WrongAuth {}'.format(auth))
+        user_id = '{}.{}'.format(app.id, 'wrong@email.tld')
 
-        url = reverse('v1:ui_users-list')
-        response = client_request.get(url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.data['user_id'])
-        self.assertEqual(response.data['password'], '')
-        self.assertEqual(response.data['email'], '')
-
-    def test_basic_auth_by_email_without_base64_data(self):
-        client_request = APIClient(HTTP_ACCEPT='application/json')
-        client_request.credentials(HTTP_AUTHORIZATION='Basic')
+        client_request = _get_basic_auth_client(user_id, '123qwe123')
 
         url = reverse('v1:ui_users-list')
         response = client_request.get(url)
 
         self.assertEqual(response.status_code, 401)
 
-    def test_basic_auth_by_email_two_auths_provided(self):
-        client_request = APIClient(HTTP_ACCEPT='application/json')
-        client_request.credentials(HTTP_AUTHORIZATION='Basic auth_one auth_two')
+    def test_basic_auth_by_email_wrong_app(self):
+        client_user = ClientUser.objects.filter().first()
 
-        url = reverse('v1:ui_users-list')
-        response = client_request.get(url)
+        user_id = '{}.{}'.format('wrong_app', client_user.email)
 
-        self.assertEqual(response.status_code, 401)
-
-    def test_basic_auth_by_email_wrong_base64_format(self):
-        client_request = APIClient(HTTP_ACCEPT='application/json')
-        client_request.credentials(HTTP_AUTHORIZATION='Basic wrong_format')
+        client_request = _get_basic_auth_client(user_id, '123qwe123')
 
         url = reverse('v1:ui_users-list')
         response = client_request.get(url)
