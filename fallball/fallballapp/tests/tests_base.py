@@ -583,7 +583,7 @@ class BaseTestCase(TestCase):
 
     def test_creation_custom_profile(self):
         admin = ClientUser.objects.filter(admin=True).first()
-        request = _get_client(admin.owner)
+        request = _get_token_auth_client(admin.owner)
 
         url = reverse('v1:users-list', kwargs={'reseller_name': admin.client.reseller.name,
                                                'client_name': admin.client.name})
@@ -598,7 +598,7 @@ class BaseTestCase(TestCase):
     def test_change_user_profile_type(self):
         admin = ClientUser.objects.filter(admin=True).first()
         user = ClientUser.objects.filter(admin=False, client=admin.client).first()
-        request = _get_client(admin.owner)
+        request = _get_token_auth_client(admin.owner)
 
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
@@ -618,7 +618,7 @@ class BaseTestCase(TestCase):
         user.profile_type = 'BRONZE'
         user.save(update_fields=['profile_type'])
 
-        request = _get_client(admin.owner)
+        request = _get_token_auth_client(admin.owner)
 
         url = reverse('v1:clients-detail', kwargs={'reseller_name': admin.client.reseller.name,
                                                    'name': admin.client.name, })
