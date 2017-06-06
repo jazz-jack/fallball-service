@@ -1,3 +1,4 @@
+import base64
 import json
 import uuid
 
@@ -11,15 +12,22 @@ from rest_framework.test import APIClient
 from fallballapp.models import Application, Reseller, Client, ClientUser, UNLIMITED
 
 
-def _get_client(user_id, accept='application/json'):
-    """
-    Returns request object with admin token
-    """
+def _get_token_auth_client(user_id, accept='application/json'):
     client = APIClient(HTTP_ACCEPT=accept)
     token = Token.objects.filter(user_id=user_id).first()
     if not token:
         token = Token.objects.create(user_id=user_id)
     client.credentials(HTTP_AUTHORIZATION='Token {token}'.format(token=token.key))
+
+    return client
+
+
+def _get_basic_auth_client(user_id, password):
+    auth = base64.b64encode('{}:{}'.format(user_id, password))
+
+    client = APIClient(HTTP_ACCEPT='application/json')
+    client.credentials(HTTP_AUTHORIZATION='Basic {}'.format(auth))
+
     return client
 
 
@@ -35,7 +43,7 @@ class BaseTestCase(TestCase):
                 'admin@fallball.io',
                 '1q2w3e')
         self.admin = admin
-        client_request = _get_client(admin.id)
+        client_request = _get_token_auth_client(admin.id)
 
         # create_application
         url = reverse('v1:applications-list')
@@ -53,7 +61,7 @@ class BaseTestCase(TestCase):
     def test_creation_under_reseller(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
                             content_type='application/json')
 
@@ -69,7 +77,7 @@ class BaseTestCase(TestCase):
 
     def test_creation_under_app(self):
         app = Application.objects.all().first()
-        client_request = _get_client(app.owner.id)
+        client_request = _get_token_auth_client(app.owner.id)
 
         reseller = Reseller.objects.filter(application=app).first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
@@ -87,7 +95,7 @@ class BaseTestCase(TestCase):
 
     def test_deleting_by_app(self):
         app = Application.objects.all().first()
-        client_request = _get_client(app.owner.id)
+        client_request = _get_token_auth_client(app.owner.id)
 
         client = Client.objects.filter().first()
         reseller_name = client.reseller.name
@@ -102,7 +110,7 @@ class BaseTestCase(TestCase):
 
     def test_deleting_by_reseller(self):
         reseller = Reseller.objects.all().first()
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
 
         client_user = ClientUser.objects.filter().first()
         client_name = client_user.client.name
@@ -119,7 +127,7 @@ class BaseTestCase(TestCase):
 
     def test_duplicated_users(self):
         app = Application.objects.all().first()
-        client_request = _get_client(app.owner.id)
+        client_request = _get_token_auth_client(app.owner.id)
 
         client_user = ClientUser.objects.filter().first()
         user_id = client_user.user_id
@@ -133,7 +141,7 @@ class BaseTestCase(TestCase):
 
     def test_two_applications(self):
         admin = get_user_model().objects.filter(username='admin').first()
-        client_request = _get_client(admin.id)
+        client_request = _get_token_auth_client(admin.id)
 
         first_app_user = ClientUser.objects.filter().first()
         first_app_client = first_app_user.client
@@ -150,7 +158,7 @@ class BaseTestCase(TestCase):
 
     def test_usage_limit(self):
         app = Application.objects.all().first()
-        client_request = _get_client(app.owner.id)
+        client_request = _get_token_auth_client(app.owner.id)
 
         reseller = Reseller.objects.filter(application=app).first()
 
@@ -171,7 +179,7 @@ class BaseTestCase(TestCase):
 
     def test_unlimited_storage(self):
         app = Application.objects.all().first()
-        client_request = _get_client(app.owner.id)
+        client_request = _get_token_auth_client(app.owner.id)
 
         # Test unlimited client created under unlimited reseller
         url = reverse('v1:resellers-list')
@@ -225,7 +233,7 @@ class BaseTestCase(TestCase):
 
     def test_not_found_objects(self):
         app = Application.objects.all().first()
-        client_request = _get_client(app.owner.id)
+        client_request = _get_token_auth_client(app.owner.id)
 
         url = reverse('v1:resellers-detail', kwargs={'name': 'not_found_reseller'})
         reseller_code = client_request.get(url, content_type='application/json').status_code
@@ -240,7 +248,7 @@ class BaseTestCase(TestCase):
 
     def test_jwt_token(self):
         reseller = Reseller.objects.all().first()
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
 
         client_user = ClientUser.objects.filter().first()
         res_name = reseller.name
@@ -256,7 +264,7 @@ class BaseTestCase(TestCase):
 
     def test_app_403_creation(self):
         reseller = Reseller.objects.all().first()
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
 
         url = reverse('v1:applications-list')
         code = client_request.post(url, json.dumps({'id': 'tricky_chicken_2'}),
@@ -268,48 +276,48 @@ class BaseTestCase(TestCase):
         client_name = admin.client.name
         reseller_name = admin.client.reseller.name
 
-        app_request = _get_client(admin.client.reseller.application.owner)
+        app_request = _get_token_auth_client(admin.client.reseller.application.owner)
         url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller_name,
                                                    'name': client_name})
         code = app_request.get(url).status_code
         self.assertEqual(code, 200)
 
-        reseller_request = _get_client(admin.client.reseller.owner)
+        reseller_request = _get_token_auth_client(admin.client.reseller.owner)
 
         code = reseller_request.get(url).status_code
         self.assertEqual(code, 200)
 
-        user_request = _get_client(admin.owner)
+        user_request = _get_token_auth_client(admin.owner)
 
         code = user_request.get(url).status_code
         self.assertEqual(code, 200)
 
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
-        user_request = _get_client(not_admin.owner)
+        user_request = _get_token_auth_client(not_admin.owner)
 
         code = user_request.get(url).status_code
         self.assertEqual(code, 404)
 
     def test_reseller_retrieve(self):
         admin = ClientUser.objects.filter(admin=True).first()
-        app_request = _get_client(admin.client.reseller.application.owner)
+        app_request = _get_token_auth_client(admin.client.reseller.application.owner)
         url = reverse('v1:resellers-list')
         answer = app_request.get(url)
         self.assertEqual(answer.status_code, 200)
         self.assertTrue('token' in answer.data[0])
 
-        reseller_request = _get_client(admin.client.reseller.owner)
+        reseller_request = _get_token_auth_client(admin.client.reseller.owner)
         code = reseller_request.get(url).status_code
         self.assertEqual(code, 200)
         self.assertTrue('token' in answer.data[0])
 
-        user_request = _get_client(admin.owner)
+        user_request = _get_token_auth_client(admin.owner)
         answer = user_request.get(url)
         self.assertEqual(answer.status_code, 200)
         self.assertFalse('token' in answer.data[0])
 
         not_admin = ClientUser.objects.filter(client=admin.client, admin=False).first()
-        user_request = _get_client(not_admin.owner)
+        user_request = _get_token_auth_client(not_admin.owner)
         code = user_request.get(url).status_code
         self.assertEqual(code, 200)
 
@@ -317,7 +325,7 @@ class BaseTestCase(TestCase):
         admin = ClientUser.objects.filter(admin=True).first()
         client_name = admin.client.name
         reseller_name = admin.client.reseller.name
-        request = _get_client(admin.owner)
+        request = _get_token_auth_client(admin.owner)
 
         # List
         list_url = reverse('v1:users-list', kwargs={'reseller_name': reseller_name,
@@ -351,7 +359,7 @@ class BaseTestCase(TestCase):
 
     def test_login_link(self):
         user = ClientUser.objects.filter(admin=True).first()
-        reseller_request = _get_client(user.client.reseller.owner, accept='text/plain')
+        reseller_request = _get_token_auth_client(user.client.reseller.owner, accept='text/plain')
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
                                                  'user_id': user.user_id})
@@ -372,7 +380,7 @@ class BaseTestCase(TestCase):
     def test_update_user(self):
         admin = ClientUser.objects.filter(admin=True).first()
         user = ClientUser.objects.filter(admin=False, client=admin.client).first()
-        request = _get_client(admin.owner)
+        request = _get_token_auth_client(admin.owner)
 
         url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
                                                  'client_name': user.client.name,
@@ -413,7 +421,7 @@ class BaseTestCase(TestCase):
 
     def test_put_creation(self):
         admin = ClientUser.objects.filter(admin=True).first()
-        request = _get_client(admin.owner)
+        request = _get_token_auth_client(admin.owner)
         user_id = uuid.uuid4()
         url = reverse('v1:users-detail', kwargs={'reseller_name': admin.client.reseller.name,
                                                  'client_name': admin.client.name,
@@ -432,7 +440,7 @@ class BaseTestCase(TestCase):
         admin = ClientUser.objects.filter(admin=True).first()
 
         root = get_user_model().objects.filter(is_superuser=True)
-        request = _get_client(root)
+        request = _get_token_auth_client(root)
 
         url = reverse('v1:resellers-detail', kwargs={'name': admin.client.reseller.name, })
         resp = request.get(url)
@@ -460,7 +468,7 @@ class BaseTestCase(TestCase):
     def test_password_set(self):
         reseller = Reseller.objects.all().first()
         client = Client.objects.filter(reseller=reseller).first()
-        request = _get_client(reseller.owner)
+        request = _get_token_auth_client(reseller.owner)
 
         url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
                                                'client_name': client.name})
@@ -515,7 +523,7 @@ class BaseTestCase(TestCase):
         app.save()
 
         url = reverse('v1:applications-detail', kwargs={'pk': app.pk})
-        request = _get_client(self.admin.id)
+        request = _get_token_auth_client(self.admin.id)
 
         resp = request.put(url, json.dumps({'async': True}), content_type='application/json')
 
@@ -532,7 +540,7 @@ class BaseTestCase(TestCase):
     def test_postal_code_with_999_is_not_allowed(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         resp = client_request.post(url, json.dumps({'name': 'new_client',
                                                     'storage': {'limit': 200},
                                                     'postal_code': '99912'
@@ -545,7 +553,7 @@ class BaseTestCase(TestCase):
     def test_client_postal_code_is_saved(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         client_request.post(url, json.dumps({'name': 'new_client',
                                              'storage': {'limit': 200},
                                              'postal_code': '12345'
@@ -560,7 +568,7 @@ class BaseTestCase(TestCase):
     def test_client_postal_code_is_null_if_not_provided(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         resp = client_request.post(url, json.dumps({'name': 'new_client',
                                                     'storage': {'limit': 200}
                                                     }),
@@ -573,10 +581,50 @@ class BaseTestCase(TestCase):
         assert client is not None
         assert client.postal_code is None
 
+    def test_basic_auth_by_email(self):
+        app = Application.objects.all().first()
+
+        client_user = ClientUser.objects.filter().first()
+        client_user.owner.set_password('123qwe123')
+        client_user.owner.save()
+
+        user_id = '{}.{}'.format(app.id, client_user.email)
+
+        client_request = _get_basic_auth_client(user_id, '123qwe123')
+
+        url = reverse('v1:ui_users-list')
+        response = client_request.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_basic_auth_by_email_user_does_not_exist(self):
+        app = Application.objects.all().first()
+
+        user_id = '{}.{}'.format(app.id, 'wrong@email.tld')
+
+        client_request = _get_basic_auth_client(user_id, '123qwe123')
+
+        url = reverse('v1:ui_users-list')
+        response = client_request.get(url)
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_basic_auth_by_email_wrong_app(self):
+        client_user = ClientUser.objects.filter().first()
+
+        user_id = '{}.{}'.format('wrong_app', client_user.email)
+
+        client_request = _get_basic_auth_client(user_id, '123qwe123')
+
+        url = reverse('v1:ui_users-list')
+        response = client_request.get(url)
+
+        self.assertEqual(response.status_code, 401)
+
     def test_superadmin_always_created_with_zero_limit(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
                             content_type='application/json')
 
@@ -593,7 +641,7 @@ class BaseTestCase(TestCase):
     def test_superadmin_does_not_affect_users_count(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
                             content_type='application/json')
 
@@ -618,7 +666,7 @@ class BaseTestCase(TestCase):
     def test_superadmin_invisible_in_get_users_list(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_client(reseller.owner)
+        client_request = _get_token_auth_client(reseller.owner)
         client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200}}),
                             content_type='application/json')
 

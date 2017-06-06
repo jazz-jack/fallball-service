@@ -7,7 +7,7 @@ from .views import (ApplicationViewSet, ClientUserViewSet, ClientViewSet,
 router = routers.SimpleRouter()
 
 # Route for UI authorization
-router.register(r'users', UsersViewSet)
+router.register(r'users', UsersViewSet, base_name='ui_users')
 
 # Route for applications
 router.register(r'applications', ApplicationViewSet, base_name='applications')
