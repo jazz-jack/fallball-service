@@ -26,7 +26,7 @@ def _get_basic_auth_client(user_id, password):
     auth = base64.b64encode('{}:{}'.format(user_id, password).encode('utf-8'))
 
     client = APIClient(HTTP_ACCEPT='application/json')
-    client.credentials(HTTP_AUTHORIZATION='Basic {}'.format(auth))
+    client.credentials(HTTP_AUTHORIZATION='Basic {}'.format(auth.decode('utf-8')))
 
     return client
 
