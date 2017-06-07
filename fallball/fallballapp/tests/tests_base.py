@@ -548,7 +548,26 @@ class BaseTestCase(TestCase):
                                    content_type='application/json')
 
         self.assertEqual(resp.status_code, 400)
+
         assert 'postal_code' in resp.json()
+
+        self.assertEqual(resp.json()['postal_code'][0], 2)
+
+    def test_postal_code_invalid(self):
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_token_auth_client(reseller.owner)
+        resp = client_request.post(url, json.dumps({'name': 'new_client',
+                                                    'storage': {'limit': 200},
+                                                    'postal_code': 'invalid'
+                                                    }),
+                                   content_type='application/json')
+
+        self.assertEqual(resp.status_code, 400)
+
+        assert 'postal_code' in resp.json()
+
+        self.assertEqual(resp.json()['postal_code'][0], 1)
 
     def test_client_postal_code_is_saved(self):
         reseller = Reseller.objects.all().first()

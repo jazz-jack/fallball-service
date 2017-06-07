@@ -123,10 +123,11 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     def validate_postal_code(self, value):
         if not value.isdigit() or len(value) != 5:
-            raise rest_serializers.ValidationError("Postal code must be a 5-digit number")
+            # ValidationError is triggered with error code and message
+            raise rest_serializers.ValidationError([1, "Postal code must be a 5-digit number"])
 
         if value.startswith('999'):
-            raise rest_serializers.ValidationError("Postal code can't starts with 999")
+            raise rest_serializers.ValidationError([2, "Postal code can't starts with 999"])
 
         return value
 
