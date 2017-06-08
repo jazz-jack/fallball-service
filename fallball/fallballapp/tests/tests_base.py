@@ -23,10 +23,10 @@ def _get_token_auth_client(user_id, accept='application/json'):
 
 
 def _get_basic_auth_client(user_id, password):
-    auth = base64.b64encode('{}:{}'.format(user_id, password))
+    auth = base64.b64encode('{}:{}'.format(user_id, password).encode('utf-8'))
 
     client = APIClient(HTTP_ACCEPT='application/json')
-    client.credentials(HTTP_AUTHORIZATION='Basic {}'.format(auth))
+    client.credentials(HTTP_AUTHORIZATION='Basic {}'.format(auth.decode('utf-8')))
 
     return client
 
@@ -551,7 +551,9 @@ class BaseTestCase(TestCase):
 
         assert 'postal_code' in resp.json()
 
-        self.assertEqual(resp.json()['postal_code'][0], 2)
+        self.assertEqual(resp.json()['postal_code']['code'], 'E1002')
+        self.assertEqual(resp.json()['postal_code']['message'],
+                         "Postal code can't start with 999")
 
     def test_postal_code_invalid(self):
         reseller = Reseller.objects.all().first()
@@ -567,7 +569,9 @@ class BaseTestCase(TestCase):
 
         assert 'postal_code' in resp.json()
 
-        self.assertEqual(resp.json()['postal_code'][0], 1)
+        self.assertEqual(resp.json()['postal_code']['code'], 'E1001')
+        self.assertEqual(resp.json()['postal_code']['message'],
+                         "Postal code must be a 5-digit number")
 
     def test_client_postal_code_is_saved(self):
         reseller = Reseller.objects.all().first()
