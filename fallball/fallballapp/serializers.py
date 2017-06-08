@@ -7,6 +7,7 @@ from rest_framework import serializers as rest_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 
+from fallballapp.error_codes import ACTIVATION_ERROR, VALIDATION_ERROR
 from fallballapp.models import Application, Client, ClientUser, Reseller
 from fallballapp.utils import get_app_username, get_jwt_token
 
@@ -123,10 +124,17 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
 
     def validate_postal_code(self, value):
         if not value.isdigit() or len(value) != 5:
-            raise rest_serializers.ValidationError("Postal code must be a 5-digit number")
+            # ValidationError is triggered with error code and message
+            raise rest_serializers.ValidationError({
+                'code': VALIDATION_ERROR,
+                'message': "Postal code must be a 5-digit number",
+            })
 
         if value.startswith('999'):
-            raise rest_serializers.ValidationError("Postal code can't starts with 999")
+            raise rest_serializers.ValidationError({
+                'code': ACTIVATION_ERROR,
+                'message': "Postal code can't start with 999",
+            })
 
         return value
 
