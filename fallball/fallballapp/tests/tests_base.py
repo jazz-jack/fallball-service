@@ -604,6 +604,51 @@ class BaseTestCase(TestCase):
         assert client is not None
         assert client.postal_code is None
 
+    def test_creation_custom_profile(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        request = _get_token_auth_client(admin.owner)
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': admin.client.reseller.name,
+                                               'client_name': admin.client.name})
+        resp = request.post(url, json.dumps({'email': 'platinum@sunnyflowers.tld',
+                                             'storage': {'limit': 5}, 'profile_type': 'PLATINUM'}),
+                            content_type='application/json')
+        self.assertEqual(resp.status_code, 201)
+
+        created_user = ClientUser.objects.filter(email='platinum@sunnyflowers.tld').first()
+        self.assertEqual(created_user.profile_type, 'PLATINUM')
+
+    def test_change_user_profile_type(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        user = ClientUser.objects.filter(admin=False, client=admin.client).first()
+        request = _get_token_auth_client(admin.owner)
+
+        url = reverse('v1:users-detail', kwargs={'reseller_name': user.client.reseller.name,
+                                                 'client_name': user.client.name,
+                                                 'user_id': user.user_id})
+
+        resp = request.put(url, json.dumps({'profile_type': 'BRILLIANT'}),
+                           content_type='application/json')
+
+        self.assertEqual(resp.status_code, 200)
+
+        changed_user = ClientUser.objects.get(id=user.id)
+        self.assertTrue(changed_user.profile_type, 'BRILLIANT')
+
+    def test_get_users_by_type(self):
+        admin = ClientUser.objects.filter(admin=True).first()
+        user = ClientUser.objects.filter(admin=False, client=admin.client).first()
+        user.profile_type = 'BRONZE'
+        user.save(update_fields=['profile_type'])
+
+        request = _get_token_auth_client(admin.owner)
+
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': admin.client.reseller.name,
+                                                   'name': admin.client.name, })
+        resp = request.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()['users_by_type']['BRONZE'], 1)
+
     def test_basic_auth_by_email(self):
         app = Application.objects.all().first()
 
