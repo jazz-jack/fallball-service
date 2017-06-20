@@ -5,6 +5,12 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 
+def rename(apps, schema_editor):
+    ClientUser = apps.get_model('fallballapp', 'ClientUser')
+    ClientUser.objects.filter(profile_type='default').update(profile_type='USERS')
+    ClientUser.objects.filter(profile_type='gold').update(profile_type='GOLD_USERS')
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -17,4 +23,5 @@ class Migration(migrations.Migration):
             name='profile_type',
             field=models.CharField(default=b'default', max_length=128),
         ),
+        migrations.RunPython(rename),
     ]
