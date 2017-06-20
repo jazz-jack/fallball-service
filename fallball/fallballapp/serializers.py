@@ -144,20 +144,18 @@ class ClientSerializer(rest_serializers.HyperlinkedModelSerializer):
         """
         return Client.objects.create(reseller=self.initial_data['reseller'], **validated_data)
 
+    def update(self, instance, validated_data):
+        if 'country' in validated_data:
+            del validated_data['country']
+        if 'environment' in validated_data:
+            del validated_data['environment']
+            return super(self.__class__, self).update(instance, validated_data)
+
     def get_users_amount(self, obj):
         return obj.get_users_amount()
 
     def get_users_by_type(self, obj):
         return obj.get_users_by_type()
-
-
-class ClientPutSerializer(ClientSerializer):
-    class Meta:
-        model = Client
-        fields = (
-            'name', 'email', 'postal_code', 'creation_date', 'users_amount', 'users_by_type',
-            'storage', 'is_integrated', 'status', 'country', 'environment',)
-        read_only_fields = ('status', 'country', 'environment')
 
 
 class StorageClientUserSerializer(rest_serializers.HyperlinkedModelSerializer):
