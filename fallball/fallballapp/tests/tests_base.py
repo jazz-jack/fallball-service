@@ -762,11 +762,10 @@ class BaseTestCase(TestCase):
                             content_type='application/json')
 
         url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller.name,
-                                               'name': 'new_client'})
-        client_request.put(url, json.dumps({'name': 'new_client',
-                                             'storage': {'limit': 200},
-                                             'country': 'CA', 'environment': 'production'}),
-                            content_type='application/json')
+                                                   'name': 'new_client'})
+        client_request.put(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200},
+                                            'country': 'CA', 'environment': 'production'}),
+                           content_type='application/json')
 
         resp = client_request.get(url)
         self.assertEquals(resp.status_code, 200)
