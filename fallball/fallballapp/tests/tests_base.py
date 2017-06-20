@@ -752,3 +752,26 @@ class BaseTestCase(TestCase):
 
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(len(resp.json()), 0)
+
+    def test_country_and_environment_are_read_only_list(self):
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_token_auth_client(reseller.owner)
+        client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200},
+                                             'environment': 'test', 'country': 'US'}),
+                            content_type='application/json')
+
+        url = reverse('v1:clients-detail', kwargs={'reseller_name': reseller.name,
+                                               'name': 'new_client'})
+        client_request.put(url, json.dumps({'name': 'new_client',
+                                             'storage': {'limit': 200},
+                                             'country': 'CA', 'environment': 'production'}),
+                            content_type='application/json')
+
+        resp = client_request.get(url)
+        self.assertEquals(resp.status_code, 200)
+
+        client = resp.json()
+
+        self.assertEquals(client['country'], 'US')
+        self.assertEquals(client['environment'], 'test')

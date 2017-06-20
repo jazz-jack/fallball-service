@@ -26,7 +26,8 @@ from fallballapp.middleware import logger
 from fallballapp.models import Application, Client, ClientUser, Reseller, UNLIMITED
 from fallballapp.renderers import PlainTextRenderer
 from fallballapp.serializers import (ApplicationSerializer, ApplicationPutSerializer,
-                                     ClientSerializer, ClientUserSerializer, ResellerSerializer,
+                                     ClientSerializer, ClientPutSerializer,
+                                     ClientUserSerializer, ResellerSerializer,
                                      ResellerNameSerializer, UserAuthorizationSerializer)
 from fallballapp.utils import (get_app_username, get_object_or_403, get_jwt_token,
                                is_superuser, is_application, get_user_context, free_space)
@@ -132,6 +133,11 @@ class ClientViewSet(ModelViewSet):
     authentication_classes = (TokenAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
     lookup_field = 'name'
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return ClientPutSerializer
+        return ClientSerializer
 
     def create(self, request, *args, **kwargs):
         """
