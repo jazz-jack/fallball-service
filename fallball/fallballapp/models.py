@@ -60,6 +60,8 @@ class Client(models.Model):
     postal_code = models.CharField(max_length=16, blank=True, null=True, default=None)
     is_integrated = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
+    environment = models.CharField(max_length=64, blank=True, null=True, default=None)
+    country = models.CharField(max_length=64, blank=True, null=True, default=None)
     limit = models.IntegerField()
     ready_at = models.DateTimeField(default=timezone.now)
 
