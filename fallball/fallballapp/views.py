@@ -312,8 +312,11 @@ class ClientUserViewSet(ModelViewSet):
                 client_user.usage = usage
 
             space = free_space(kwargs['client'])
-            if space < client_user.limit or client_user.usage > client_user.limit:
-                return Response("Storage limit is reached", HTTP_400_BAD_REQUEST)
+            if space < client_user.limit:
+                return Response("Client storage limit is reached", HTTP_400_BAD_REQUEST)
+            if client_user.usage > client_user.limit:
+                return Response("User's current usage is greater than the desired limit",
+                                HTTP_400_BAD_REQUEST)
 
         if 'admin' in request.data:
             client_user.admin = request.data['admin']
