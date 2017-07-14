@@ -61,7 +61,7 @@ class RequestLogMiddleware(object):
                     reseller_name = request.resolver_match.kwargs['reseller_name']
 
             if app_id:
-                self.log['response'] = {'app': app_id, }
+                self.log['app'] = app_id
             if reseller_name:
                 self.log['reseller'] = reseller_name
 
