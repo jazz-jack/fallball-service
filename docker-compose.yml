@@ -11,6 +11,11 @@ services:
      - "3306:3306"
     expose:
      - "3306"
+    entrypoint:
+      - docker-entrypoint.sh
+      - --character-set-server=utf8
+      - --collation-server=utf8_unicode_ci
+      - --init-connect='SET NAMES utf8'
   app:
     build: .
     container_name: fallballapp
