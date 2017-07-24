@@ -26,7 +26,7 @@ class RequestLogMiddleware(object):
 
         if request.body:
             try:
-                self.log['request']['body'] = json.loads(request.body.decode())
+                self.log['request']['body'] = json.loads(request.body.decode('utf-8'))
             except ValueError:
                 self.log['request']['body'] = {"message": "body is not valid json"}
 
@@ -40,7 +40,7 @@ class RequestLogMiddleware(object):
         reseller_name = None
 
         if response.content and response['content-type'] == 'application/json':
-            self.log['response']['body'] = json.loads(response.content.decode())
+            self.log['response']['body'] = json.loads(response.content.decode('utf-8'))
 
         self.log['request']['headers']['REQUEST_METHOD'] = request.META['REQUEST_METHOD'],
 
