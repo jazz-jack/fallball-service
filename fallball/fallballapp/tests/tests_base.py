@@ -787,3 +787,20 @@ class BaseTestCase(TestCase):
 
         self.assertEquals(resp.status_code, 201)
         self.assertEquals(Client.objects.get(name='new_client').country, 'США'.decode('utf-8'))
+
+    def test_creation_under_reseller_non_ascii(self):
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_token_auth_client(reseller.owner)
+        client_request.post(url, json.dumps({'name': 'Новый клиент', 'storage': {'limit': 200}}),
+                            content_type='application/json')
+
+        url = reverse('v1:users-list', kwargs={'reseller_name': reseller.name,
+                                               'client_name': 'Новый Клиент'})
+        client_request.post(url, json.dumps({'email': 'newuser@newclient.tld',
+                                             'storage': {'limit': 30},
+                                             'password': 'password'}),
+                            content_type='application/json')
+
+        self.assertTrue(Client.objects.filter(name='Новый Клиент'))
+        self.assertTrue(ClientUser.objects.filter(email='newuser@newclient.tld'))
