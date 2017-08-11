@@ -777,17 +777,6 @@ class BaseTestCase(TestCase):
         self.assertEquals(client['country'], 'US')
         self.assertEquals(client['environment'], 'test')
 
-    def test_non_latin_parameter_value(self):
-        reseller = Reseller.objects.all().first()
-        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
-        client_request = _get_token_auth_client(reseller.owner)
-        resp = client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200},
-                                                    'environment': 'test', 'country': 'США'}),
-                                   content_type='application/json')
-
-        self.assertEquals(resp.status_code, 201)
-        self.assertEquals(Client.objects.get(name='new_client').country, 'США'.decode('utf-8'))
-
     def test_creation_under_reseller_non_ascii(self):
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
