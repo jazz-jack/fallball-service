@@ -40,7 +40,7 @@ class RequestLogMiddleware(object):
         reseller_name = None
 
         if response.content and response['content-type'] == 'application/json':
-            self.log['response']['body'] = json.loads(response.content.decode())
+            self.log['response']['body'] = json.loads(response.content)
 
         self.log['request']['headers']['REQUEST_METHOD'] = request.META['REQUEST_METHOD'],
 
