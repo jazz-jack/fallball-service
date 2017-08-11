@@ -6,10 +6,12 @@ from django.db import models
 from django.db.models import Sum
 from django.conf import settings
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 
 UNLIMITED = -1
 
 
+@python_2_unicode_compatible
 class Application(models.Model):
     id = models.CharField(max_length=150, primary_key=True)
     owner = models.OneToOneField(settings.AUTH_USER_MODEL)
@@ -19,6 +21,7 @@ class Application(models.Model):
         return self.id
 
 
+@python_2_unicode_compatible
 class Reseller(models.Model):
     name = models.CharField(max_length=120)
     rid = models.CharField("Reseller ID", max_length=120)
@@ -50,6 +53,7 @@ class Reseller(models.Model):
         return total or 0
 
 
+@python_2_unicode_compatible
 class Client(models.Model):
     ASYNC_PROVISION_DELAY = 120  # time to complete provisioning in async scenario
     STATUS_PROVISIONING = 'provisioning'

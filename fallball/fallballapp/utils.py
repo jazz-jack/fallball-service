@@ -18,7 +18,7 @@ def get_object_or_403(*args, **kwargs):
 
 
 def get_app_username(app_id, username):
-    return '{}.{}'.format(app_id, username)
+    return u'{}.{}'.format(app_id, username)
 
 
 def get_jwt_token(user):
