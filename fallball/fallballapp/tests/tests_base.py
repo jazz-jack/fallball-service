@@ -778,12 +778,22 @@ class BaseTestCase(TestCase):
         self.assertEquals(client['environment'], 'test')
 
     def test_non_latin_parameter_value(self):
+        usa_text = 'США'
+
         reseller = Reseller.objects.all().first()
         url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
         client_request = _get_token_auth_client(reseller.owner)
         resp = client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200},
-                                                    'environment': 'test', 'country': 'США'}),
+                                                    'environment': 'test', 'country': usa_text}),
                                    content_type='application/json')
 
         self.assertEquals(resp.status_code, 201)
-        self.assertEquals(Client.objects.get(name='new_client').country, 'США'.decode('utf-8'))
+
+        # Python 2 needs to decode to utf while python 3 supports it by default
+        # and does not have decode function
+        try:
+            usa_text = usa_text.decode('utf-8')
+        except AttributeError:
+            pass
+
+        self.assertEquals(Client.objects.get(name='new_client').country, usa_text)
