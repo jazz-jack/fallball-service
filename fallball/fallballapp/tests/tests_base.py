@@ -2,6 +2,7 @@
 
 import base64
 import json
+import sys
 import uuid
 
 from django.contrib.auth import get_user_model
@@ -776,6 +777,25 @@ class BaseTestCase(TestCase):
 
         self.assertEquals(client['country'], 'US')
         self.assertEquals(client['environment'], 'test')
+
+    def test_non_latin_parameter_value(self):
+        usa_text = 'США'
+
+        reseller = Reseller.objects.all().first()
+        url = reverse('v1:clients-list', kwargs={'reseller_name': reseller.name})
+        client_request = _get_token_auth_client(reseller.owner)
+        resp = client_request.post(url, json.dumps({'name': 'new_client', 'storage': {'limit': 200},
+                                                    'environment': 'test', 'country': usa_text}),
+                                   content_type='application/json')
+
+        self.assertEquals(resp.status_code, 201)
+
+        # Python 2 needs to decode to utf while python 3 supports it by default
+        # and does not have decode function
+        if sys.version_info[0] < 3:
+            usa_text = usa_text.decode('utf-8')
+
+        self.assertEquals(Client.objects.get(name='new_client').country, usa_text)
 
     def test_creation_under_reseller_non_ascii(self):
         reseller = Reseller.objects.all().first()
