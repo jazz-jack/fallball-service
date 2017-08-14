@@ -778,7 +778,6 @@ class BaseTestCase(TestCase):
         self.assertEquals(client['country'], 'US')
         self.assertEquals(client['environment'], 'test')
 
-
     def test_non_latin_parameter_value(self):
         usa_text = 'США'
 
