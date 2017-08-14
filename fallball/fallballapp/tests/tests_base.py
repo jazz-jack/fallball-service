@@ -2,6 +2,7 @@
 
 import base64
 import json
+import sys
 import uuid
 
 from django.contrib.auth import get_user_model
@@ -792,10 +793,8 @@ class BaseTestCase(TestCase):
 
         # Python 2 needs to decode to utf while python 3 supports it by default
         # and does not have decode function
-        try:
+        if sys.version_info[0] < 3:
             usa_text = usa_text.decode('utf-8')
-        except AttributeError:
-            pass
 
         self.assertEquals(Client.objects.get(name='new_client').country, usa_text)
 
@@ -815,4 +814,3 @@ class BaseTestCase(TestCase):
 
         self.assertTrue(Client.objects.filter(name='Новый Клиент'))
         self.assertTrue(ClientUser.objects.filter(email='newuser@newclient.tld'))
-
