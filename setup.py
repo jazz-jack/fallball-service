@@ -9,7 +9,7 @@ with open(join(dirname(abspath(__file__)), 'requirements.txt'), 'r') as requirem
 
 setup(
     name='fallball',
-    version='1.1.13',
+    version='1.2.0',
     author='APS Connect team',
     author_email='aps@odin.com',
     packages=find_packages('fallball'),
