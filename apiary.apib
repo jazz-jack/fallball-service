@@ -8,24 +8,24 @@ Fallball solution is a test service, which provides you with such functionality 
 ## General Information Collection [/v1/]
 
 ### Get Fallball Service Information [GET]
-    
+
 + Response 200 (application/json)
 
         [
             {
-                "description": "Fallball API allows you manage resellers, companies, users" 
+                "description": "Fallball API allows you manage resellers, companies, users"
             }
         ]
 
 ## Resellers Collection [/v1/resellers/]
 
 ### List All Resellers [GET]
-    
+
 + Response 200 (application/json)
 
         [
             {
-                "name": "reseller_a", 
+                "name": "reseller_a",
                 "clients_amount": 25,
                 "token": "35b77ce0-502f-11e4-9b31-25bca9fc0b20"
                 "rid": "a66c2dd0-048d-452d-bbd7-50e78ff66e5d"
@@ -92,18 +92,6 @@ Fallball solution is a test service, which provides you with such functionality 
 ### Delete Reseller [DELETE]
 
 + Response 204
-
-## Reset Reseller to Initial State Collection [/v1/resellers/{reseller_name}/reset/]
-
-### Reset Reseller [GET]
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "result": "true",
-            }
-        ]
 
 ## Clients Collection [/v1/resellers/{reseller_name}/clients/]
 
@@ -213,9 +201,9 @@ Fallball solution is a test service, which provides you with such functionality 
         {
             "email": "john@company.com",
             "password": "",
-            "admin": true, 
-            "storage": { 
-                    "usage": "15", 
+            "admin": true,
+            "storage": {
+                    "usage": "15",
                     "limit": "32"
             }
         }
@@ -225,17 +213,17 @@ Fallball solution is a test service, which provides you with such functionality 
 ### Get User Information [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "email": "john@company.com",
             "password": "D7H3kj8",
-            "admin": true, 
-            "storage": { 
-                    "usage": "15", 
+            "admin": true,
+            "storage": {
+                    "usage": "15",
                     "limit": "32"
             }
         }
-        
+
 ### Delete User [DELETE]
 
 + Response 204
